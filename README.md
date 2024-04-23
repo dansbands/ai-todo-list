@@ -1,3 +1,9 @@
+# ai-todo-list
+Todo list enhanced with AI to help you complete tasks and achieve goals
+
+
+
+
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
