@@ -10,7 +10,7 @@ function App() {
       </header>
       <div className="App-body">
         <Tasks />
-        {/* <Chat /> */}
+        <Chat />
       </div>
     </div>
   );

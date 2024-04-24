@@ -27,6 +27,14 @@
   margin-bottom: 5px;
   padding: 10px;
   text-align: left;
+}
 
+.task-container {
+  border: 1px solid red;
+  display: flex;
+  width: 80%;
+}
 
+.task-title {
+  margin-left: 10px;
 }
