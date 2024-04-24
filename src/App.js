@@ -7,9 +7,11 @@ function App() {
     <div className="App">
       <header className="App-header">
         <div>I'm a React App</div>
-        <Tasks />
-        <Chat />
       </header>
+      <div className="App-body">
+        <Tasks />
+        {/* <Chat /> */}
+      </div>
     </div>
   );
 }

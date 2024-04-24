@@ -1,10 +1,22 @@
 import React from "react";
 
-const Task = ({ data }) => {
-  const { title, dueDate, completed } = data;
-  const text = `${title} - ${dueDate} - ${completed}`;
+const Task = ({ data, toggleCompleted }) => {
+  const { title, dueDate, completed, id } = data;
+  const text = `${title} - ${dueDate}`;
 
-  return <div>{text}</div>;
+  return (
+    <div className="task-row">
+      <label className="container">
+        <input
+          type="checkbox"
+          checked={completed}
+          onChange={() => toggleCompleted(id)}
+        />
+        <span className="checkmark"></span>
+        {text}
+      </label>
+    </div>
+  );
 };
 
 export default Task;
