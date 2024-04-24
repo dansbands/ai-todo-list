@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import Task from "./task";
 import { v4 as uuid } from "uuid";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faPlus } from "@fortawesome/free-solid-svg-icons";
 
 const exampleTasks = [
   {
@@ -63,7 +65,7 @@ const Tasks = () => {
 
   return (
     <>
-      <div className="task-list">Tasks</div>
+      <div className="task-title">Tasks</div>
       <div className="task-form">
         <input
           name="task-name"
@@ -72,7 +74,7 @@ const Tasks = () => {
           onKeyUp={checkForSubmit}
         />
         <button type="submit" onClick={handleSubmit}>
-          Add Task
+          <FontAwesomeIcon icon={faPlus} />
         </button>
       </div>
 
@@ -80,7 +82,7 @@ const Tasks = () => {
         {allTasks
           .sort((a, b) => sortByCompleted(a, b))
           .map((taskData) => {
-            return <Task data={taskData} toggleCompleted={toggleCompleted} />;
+            return <Task key={taskData.id} data={taskData} toggleCompleted={toggleCompleted} />;
           })}
       </div>
     </>

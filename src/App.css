@@ -1,14 +1,35 @@
+:root {
+  --primary: #e3792d;
+  --secondary: #8c1ce8;
+  --main-gradient: -webkit-linear-gradient(
+    left,
+    var(--secondary),
+    var(--primary)
+  );
+}
+
+button {
+  cursor: pointer;
+}
+
 .App {
   text-align: center;
 }
 
 .App-header {
-  border-bottom: 1px solid #282c34;
+  border-bottom: 1px solid var(--secondary);
   height: 100px;
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: center;
   font-size: calc(10px + 2vmin);
+}
+
+.App-title {
+  background: var(--main-gradient);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 .App-body {
@@ -21,11 +42,37 @@
   }
 }
 
+.task-title {
+  margin: 10px;
+}
+
 .task-list {
   padding: 20px;
 
   @media (max-width: 768px) {
     padding: 20px 0;
+  }
+}
+
+.task-form {
+  width: 100%;
+
+  & input {
+    border: 1px solid #aea6a6;
+    border-radius: 25px;
+    width: 70%;
+    padding: 10px;
+    margin-right: 10px;
+  }
+
+  & button {
+    border: 1px solid;
+    border-color: var(--secondary);
+    border-radius: 25px;
+    color: var(--secondary);
+    background: none;
+    width: 10%;
+    padding: 10px;
   }
 }
 
@@ -49,7 +96,6 @@
 }
 
 .task-toggle-button {
-  cursor: pointer;
   background-color: transparent;
   border: none;
   width: 20%;
@@ -61,6 +107,51 @@
   min-height: 100px;
   border: 1px solid #d8d0d0;
   margin-bottom: 10px;
+}
+
+.chat-form {
+  width: 100%;
+
+  & input {
+    border: 1px solid #aea6a6;
+    border-radius: 25px;
+    width: 70%;
+    padding: 10px;
+    margin-right: 10px;
+  }
+
+  & button {
+    border: 1px solid #aea6a6;
+    border-radius: 25px;
+    width: 20%;
+    padding: 10px;
+    color: white;
+    background: var(--main-gradient);
+  }
+}
+
+.chat-form-button-only {
+  display: flex;
+  justify-content: flex-end;
+
+  & button {
+    border: none;
+    border-radius: 25px;
+    width: 20%;
+    padding: 10px;
+    color: white;
+    background: -webkit-linear-gradient(right, #eb690c, #8c1ce8);
+  }
+}
+
+.chat-button {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.chat-sparkles {
+  font-size: 20px;
 }
 
 .chat-response {
