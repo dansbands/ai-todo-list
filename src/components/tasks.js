@@ -4,21 +4,21 @@ import { v4 as uuid } from "uuid";
 
 const exampleTasks = [
   {
-    title: "Lots to do",
+    title: "Take out trash",
     dueDate: "11/25/24",
     completed: false,
     order: 1,
     id: uuid(),
   },
   {
-    title: "Plenty going on",
+    title: "Clean air conditioner filters",
     dueDate: "11/20/24",
     completed: false,
     order: 2,
     id: uuid(),
   },
   {
-    title: "I think it's nap time",
+    title: "Change oil in car",
     dueDate: "11/27/24",
     completed: false,
     order: 3,

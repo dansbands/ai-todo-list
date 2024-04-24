@@ -1,5 +1,4 @@
 import "./App.css";
-import Chat from "./components/chat";
 import Tasks from "./components/tasks";
 
 function App() {
@@ -10,7 +9,6 @@ function App() {
       </header>
       <div className="App-body">
         <Tasks />
-        <Chat />
       </div>
     </div>
   );
