@@ -1,10 +1,21 @@
 :root {
   --primary: #e3792d;
   --secondary: #8c1ce8;
-  --main-gradient: -webkit-linear-gradient(
+  --tertiary: #1cbfe8;
+  --main-gradient-left: -webkit-linear-gradient(
     left,
     var(--secondary),
     var(--primary)
+  );
+  --main-gradient-right: -webkit-linear-gradient(
+    right,
+    var(--secondary),
+    var(--primary)
+  );
+  --secondary-gradient: -webkit-linear-gradient(
+    right,
+    var(--secondary),
+    var(--tertiary)
   );
 }
 
@@ -22,23 +33,23 @@ button {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: calc(10px + 2vmin);
+  font-size: 32px;
 }
 
 .App-title {
-  background: var(--main-gradient);
+  background: var(--main-gradient-left);
   background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
 .App-body {
-  padding: 20px;
+  padding: 0 20px;
   display: flex;
   flex-direction: column;
 
   @media (max-width: 768px) {
-    padding: 5px;
+    padding: 0 5px;
   }
 }
 
@@ -54,26 +65,56 @@ button {
   }
 }
 
+.task-form-container {
+  width: min-content;
+}
+
 .task-form {
+  display: flex;
+  justify-content: space-around;
+  margin-top: 15px;
   width: 100%;
+}
+
+.task-form-left {
+  width: 85%;
+  margin-right: 20px;
 
   & input {
     border: 1px solid #aea6a6;
     border-radius: 25px;
-    width: 70%;
     padding: 10px;
-    margin-right: 10px;
+    padding-right: 0;
+    height: 25px;
+    width: 100%;
   }
+}
+
+.task-form-right {
+  width: 10%;
 
   & button {
     border: 1px solid;
     border-color: var(--secondary);
     border-radius: 25px;
     color: var(--secondary);
-    background: none;
-    width: 10%;
+    background: transparent;
     padding: 10px;
+    height: 45px;
+    width: 100%;
+    min-width: 45px;
+
+    &:hover {
+      background: var(--secondary-gradient);
+      color: white;
+    }
   }
+}
+
+.task-input-error {
+  color: red;
+  text-align: left;
+  margin: 10px;
 }
 
 .task-row {
@@ -91,15 +132,12 @@ button {
   width: 80%;
 }
 
-.task-title {
-  margin-left: 10px;
-}
-
 .task-toggle-button {
   background-color: transparent;
   border: none;
   width: 20%;
   text-align: right;
+  color: var(--secondary);
 }
 
 .task-info-pane {
@@ -126,7 +164,7 @@ button {
     width: 20%;
     padding: 10px;
     color: white;
-    background: var(--main-gradient);
+    background: var(--main-gradient-left);
   }
 }
 
@@ -137,10 +175,14 @@ button {
   & button {
     border: none;
     border-radius: 25px;
-    width: 20%;
-    padding: 10px;
+    width: max-content;
+    padding: 10px 20px;
     color: white;
-    background: -webkit-linear-gradient(right, #eb690c, #8c1ce8);
+    background: var(--main-gradient-left);
+
+    &:hover {
+      background: var(--main-gradient-right);
+    }
   }
 }
 

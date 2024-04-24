@@ -31,6 +31,12 @@ const exampleTasks = [
 const Tasks = () => {
   const [allTasks, setAllTasks] = useState([...exampleTasks]);
   const [inputValue, setInputValue] = useState("");
+  const [inputError, setInputError] = useState(true);
+
+  const handleChange = (val) => {
+    if (inputError) setInputError(false);
+    setInputValue(val);
+  };
 
   const checkForSubmit = (e) => {
     if (e.key === "Enter") return handleSubmit(e);
@@ -45,8 +51,12 @@ const Tasks = () => {
       id: uuid(),
     };
 
-    setAllTasks((prevState) => [...prevState, newTask]);
-    setInputValue("");
+    if (inputValue) {
+      setAllTasks((prevState) => [...prevState, newTask]);
+      setInputValue("");
+    } else {
+      setInputError(true);
+    }
   };
 
   const toggleCompleted = (id) => {
@@ -65,24 +75,38 @@ const Tasks = () => {
 
   return (
     <>
-      <div className="task-title">Tasks</div>
       <div className="task-form">
-        <input
-          name="task-name"
-          value={inputValue}
-          onChange={(e) => setInputValue(e.target.value)}
-          onKeyUp={checkForSubmit}
-        />
-        <button type="submit" onClick={handleSubmit}>
-          <FontAwesomeIcon icon={faPlus} />
-        </button>
+        <div className="task-form-left">
+          <input
+            name="task-name"
+            value={inputValue}
+            onChange={(e) => handleChange(e.target.value)}
+            onKeyUp={checkForSubmit}
+          />
+          {inputError && (
+            <div className="task-input-error">
+              Please enter a task name in the input field above.
+            </div>
+          )}
+        </div>
+        <div className="task-form-right">
+          <button type="submit" onClick={handleSubmit}>
+            <FontAwesomeIcon icon={faPlus} />
+          </button>
+        </div>
       </div>
 
       <div className="task-list">
         {allTasks
           .sort((a, b) => sortByCompleted(a, b))
           .map((taskData) => {
-            return <Task key={taskData.id} data={taskData} toggleCompleted={toggleCompleted} />;
+            return (
+              <Task
+                key={taskData.id}
+                data={taskData}
+                toggleCompleted={toggleCompleted}
+              />
+            );
           })}
       </div>
     </>
