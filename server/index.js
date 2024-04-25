@@ -4,7 +4,13 @@ const axios = require("axios");
 const cors = require("cors");
 
 const app = express();
-app.use(cors());
+const isDev = process.env.NODE_ENV === 'development'
+const corsOptions = {
+  origin: "https://dansbands.github.io/ai-todo-list/",
+  optionsSuccessStatus: 201, // some legacy browsers (IE11, various SmartTVs) choke on 204
+};
+
+app.use(cors(!isDev ? corsOptions : null));
 app.use(express.json());
 
 const PORT = process.env.PORT || 3001;
