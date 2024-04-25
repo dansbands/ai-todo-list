@@ -6,7 +6,7 @@ const cors = require("cors");
 const app = express();
 const isDev = process.env.NODE_ENV === 'development'
 const corsOptions = {
-  origin: "https://dansbands.github.io/ai-todo-list/",
+  origin: "*",
   optionsSuccessStatus: 201, // some legacy browsers (IE11, various SmartTVs) choke on 204
 };
 
