@@ -6,7 +6,9 @@ const Chat = ({ title }) => {
   const [response, setResponse] = useState({});
   const [loading, setLoading] = useState(false);
 
-  const prompt = `I need to ${title}. How can I best accomplish this? Additionally, can you please provide a list of web resources for how to ${title} in json format with linkTitle, url, and description? Format the entire answer as a json object of {message, links}`;
+  const prompt = `I need to ${title}. How can I best accomplish this? Additionally, can you please provide a list of web resources for how to ${title} in json format with linkTitle, url, and description? Finally, can you provide an optimized search string on this topic for a google search? Format the entire answer as a json object of {message, links, googleSearch}`;
+  const searchTermQueryString = title.split(" ").join("%20");
+  const googleLink = `https://www.google.com/search?q=${searchTermQueryString}`;
 
   useEffect(() => {
     if (title) setMessage(prompt);
@@ -55,6 +57,14 @@ const Chat = ({ title }) => {
       <div className="chat-response">
         <div>{response.message}</div>
         {renderLinks()}
+        <a
+          href={googleLink}
+          className="chat-search-link"
+          target="_blank"
+          rel="noreferrer"
+        >
+          continue search on Google
+        </a>
       </div>
     </div>
   );
