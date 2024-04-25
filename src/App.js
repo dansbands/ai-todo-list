@@ -8,6 +8,7 @@ function App() {
         <div className="App-title">A.I. To-Do List</div>
       </header>
       <div className="App-body">
+        <h3>Server: {process.env.REACT_APP_SERVER_URL}</h3>
         <Tasks />
       </div>
     </div>
