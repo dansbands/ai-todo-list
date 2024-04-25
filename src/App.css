@@ -87,11 +87,19 @@ button {
     padding-right: 0;
     height: 25px;
     width: 100%;
+
+    @media (max-width: 768px) {
+      width: 90%;
+    }
   }
 }
 
 .task-form-right {
   width: 10%;
+
+  @media (max-width: 768px) {
+    width: 20%;
+  }
 
   & button {
     border: 1px solid;
@@ -103,6 +111,10 @@ button {
     height: 45px;
     width: 100%;
     min-width: 45px;
+
+    @media (max-width: 768px) {
+      width: 90%;
+    }
 
     &:hover {
       background: var(--secondary-gradient);
@@ -130,6 +142,10 @@ button {
 .task-container {
   display: flex;
   width: 80%;
+
+  & input {
+    margin: 12px 0;
+  }
 }
 
 .task-toggle-button {
@@ -138,6 +154,7 @@ button {
   width: 20%;
   text-align: right;
   color: var(--secondary);
+  font-size: 20px;
 }
 
 .task-info-pane {
@@ -145,6 +162,10 @@ button {
   min-height: 100px;
   border: 1px solid #d8d0d0;
   margin-bottom: 10px;
+}
+
+.hidden {
+  display: none;
 }
 
 .chat-form {

@@ -31,7 +31,7 @@ const exampleTasks = [
 const Tasks = () => {
   const [allTasks, setAllTasks] = useState([...exampleTasks]);
   const [inputValue, setInputValue] = useState("");
-  const [inputError, setInputError] = useState(true);
+  const [inputError, setInputError] = useState(false);
 
   const handleChange = (val) => {
     if (inputError) setInputError(false);
@@ -52,7 +52,7 @@ const Tasks = () => {
     };
 
     if (inputValue) {
-      setAllTasks((prevState) => [...prevState, newTask]);
+      setAllTasks((prevState) => [newTask, ...prevState]);
       setInputValue("");
     } else {
       setInputError(true);

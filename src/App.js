@@ -5,7 +5,7 @@ function App() {
   return (
     <div className="App">
       <header className="App-header">
-        <div className="App-title">AI Todo List</div>
+        <div className="App-title">A.I. To-Do List</div>
       </header>
       <div className="App-body">
         <Tasks />

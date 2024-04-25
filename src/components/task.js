@@ -9,8 +9,7 @@ import Chat from "./chat";
 const Task = ({ data, toggleCompleted }) => {
   const [isOpen, toggleOpen] = useState(false);
 
-  const { title, dueDate, completed, id } = data;
-  const text = `${title} - ${dueDate}`;
+  const { title, completed, id } = data;
 
   return (
     <>
@@ -22,7 +21,7 @@ const Task = ({ data, toggleCompleted }) => {
             onChange={() => toggleCompleted(id)}
           />
           <div className="checkmark"></div>
-          <div className="task-title">{text}</div>
+          <div className="task-title">{title}</div>
         </label>
         <button
           className="task-toggle-button"
@@ -31,11 +30,9 @@ const Task = ({ data, toggleCompleted }) => {
           <FontAwesomeIcon icon={isOpen ? faChevronDown : faChevronRight} />
         </button>
       </div>
-      {isOpen && (
-        <div className="task-info-pane">
-          <Chat title={title} />
-        </div>
-      )}
+      <div className={isOpen ? "task-info-pane" : "hidden"}>
+        <Chat title={title} />
+      </div>
     </>
   );
 };
