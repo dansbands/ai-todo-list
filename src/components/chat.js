@@ -12,7 +12,8 @@ const Chat = ({ title }) => {
 
   useEffect(() => {
     async function fetchData() {
-      const message = await axios.get(process.env.REACT_APP_PROD_SERVER_URL, {
+      const url = process.env.REACT_APP_PROD_SERVER_URL;
+      const message = await axios.get(url, {
         headers: {
           "Content-Type": "application/json",
           "Accept": "application/json",
@@ -27,7 +28,8 @@ const Chat = ({ title }) => {
 
   const sendMessage = async () => {
     setLoading(true);
-    const result = await axios.post(`${process.env.REACT_APP_PROD_SERVER_URL}/api/chat`, {
+    const url = process.env.REACT_APP_PROD_SERVER_URL;
+    const result = await axios.post(`${url}/api/chat`, {
       message,
     });
     setResponse(JSON.parse(result.data.choices[0].message.content));
