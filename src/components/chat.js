@@ -16,7 +16,7 @@ const Chat = ({ title }) => {
 
   const sendMessage = async () => {
     setLoading(true);
-    const result = await axios.post(`${process.env.REACT_APP_SERVER_URL}/api/chat`, {
+    const result = await axios.post(`${process.env.REACT_APP_PROD_SERVER_URL}/api/chat`, {
       message,
     });
     setResponse(JSON.parse(result.data.choices[0].message.content));
