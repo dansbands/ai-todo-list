@@ -13,7 +13,7 @@ const corsOptions = {
 app.use(cors(!isDev ? corsOptions : null));
 app.use(express.json());
 
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT || 10000;
 
 app.get("/", (req, res) => {
   console.log("We are live");
