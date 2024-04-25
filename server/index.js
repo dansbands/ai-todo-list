@@ -4,7 +4,7 @@ const axios = require("axios");
 const cors = require("cors");
 
 const app = express();
-const isDev = process.env.NODE_ENV === 'development'
+const isDev = process.env.NODE_ENV === "development";
 const corsOptions = {
   origin: "*",
   optionsSuccessStatus: 201, // some legacy browsers (IE11, various SmartTVs) choke on 204
@@ -14,6 +14,11 @@ app.use(cors(!isDev ? corsOptions : null));
 app.use(express.json());
 
 const PORT = process.env.PORT || 3001;
+
+app.get("/", (req, res) => {
+  console.log("We are live");
+  res.send("Got the app!!!");
+});
 
 app.post("/api/chat", async (req, res) => {
   const { message } = req.body;

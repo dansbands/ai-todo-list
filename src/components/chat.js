@@ -11,6 +11,12 @@ const Chat = ({ title }) => {
   const googleLink = `https://www.google.com/search?q=${searchTermQueryString}`;
 
   useEffect(() => {
+    async function fetchData() {
+      const message = await axios.get(process.env.REACT_APP_PROD_SERVER_URL);
+      console.log('message', message)
+    }
+    fetchData();
+    
     if (title) setMessage(prompt);
   }, [title, prompt]);
 
