@@ -6,7 +6,9 @@ function App() {
     <div className="App">
       <header className="App-header">
         <div className="App-title">A.I. To-Do List</div>
+        <div className="App-subtitle">powered by ChatGPT</div>
       </header>
+      <div className="App-divider" />
       <div className="App-body">
         <Tasks />
       </div>

@@ -14,15 +14,17 @@ const Task = ({ data, toggleCompleted }) => {
   return (
     <>
       <div className="task-row">
-        <label className="task-container">
-          <input
-            type="checkbox"
-            checked={completed}
-            onChange={() => toggleCompleted(id)}
-          />
-          <div className="checkmark"></div>
+        <div className="task-row-left">
+          <label className="task-checkbox-container">
+            <input
+              type="checkbox"
+              checked={completed}
+              onChange={() => toggleCompleted(id)}
+            />
+            <div className="task-checkmark"></div>
+          </label>
           <div className="task-title">{title}</div>
-        </label>
+        </div>
         <button
           className="task-toggle-button"
           onClick={() => toggleOpen((prevState) => !prevState)}

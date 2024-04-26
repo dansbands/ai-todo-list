@@ -1,19 +1,26 @@
 :root {
-  --primary: #e3792d;
+  --background: #fff;
+  --primary: #f59d5e;
+  --primaryDark: #f37d2a;
   --secondary: #8c1ce8;
   --tertiary: #1cbfe8;
-  --main-gradient-left: -webkit-linear-gradient(
-    left,
+  --main-gradient-left: linear-gradient(
+    to right,
     var(--secondary),
     var(--primary)
   );
-  --main-gradient-right: -webkit-linear-gradient(
-    right,
+  --main-gradient-right: linear-gradient(
+    to left,
     var(--secondary),
     var(--primary)
   );
-  --secondary-gradient: -webkit-linear-gradient(
-    right,
+  --secondary-gradient-left: linear-gradient(
+    to left,
+    var(--secondary),
+    var(--tertiary)
+  );
+  --secondary-gradient-right: linear-gradient(
+    to right,
     var(--secondary),
     var(--tertiary)
   );
@@ -31,6 +38,7 @@ button {
   border-bottom: 1px solid var(--secondary);
   height: 100px;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   font-size: 32px;
@@ -41,6 +49,23 @@ button {
   background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
+}
+
+.App-subtitle {
+  font-size: 8px;
+  width: 190px;
+  text-align: right;
+  color: var(--secondary);
+  /* background: var(--main-gradient-left);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent; */
+}
+
+.App-divider {
+  background: var(--secondary-gradient-left);
+  height: 2px;
+  width: 100vw;
 }
 
 .App-body {
@@ -59,6 +84,8 @@ button {
 
 .task-list {
   padding: 20px;
+  background: var(--secondary-gradient-right);
+  background-clip: content-box;
 
   @media (max-width: 768px) {
     padding: 20px 0;
@@ -111,41 +138,97 @@ button {
     height: 45px;
     width: 100%;
     min-width: 45px;
+    transition: background-color 0.3s;
 
     @media (max-width: 768px) {
       width: 90%;
     }
 
     &:hover {
-      background: var(--secondary-gradient);
+      background-color: var(--secondary);
       color: white;
     }
   }
 }
 
 .task-input-error {
-  color: red;
+  color: var(--primaryDark);
   text-align: left;
   margin: 10px;
 }
 
 .task-row {
+  color: #454a5a;
   display: flex;
+  font-size: 18px;
+  font-weight: 700;
   justify-content: space-between;
-  border: 1px solid #aea6a6;
-  border-radius: 5px;
-  margin-bottom: 5px;
+  align-items: center;
+  background: var(--background);
+  margin-bottom: 1px;
   padding: 10px;
   text-align: left;
 }
 
-.task-container {
+.task-row-left {
   display: flex;
-  width: 80%;
+  flex-direction: row;
+  width: 300px;
+}
 
-  & input {
-    margin: 12px 0;
-  }
+.task-checkbox-container {
+  display: block;
+  position: relative;
+  padding-left: 35px;
+  margin-bottom: 6px;
+  cursor: pointer;
+  font-size: 22px;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.task-checkbox-container input {
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+  height: 0;
+  width: 0;
+}
+.task-checkbox-container input:checked ~ .task-checkmark:after {
+  display: block;
+}
+.task-checkbox-container:hover input ~ .task-checkmark {
+  background-color: #f3eeee;
+}
+.task-checkbox-container .task-checkmark:after {
+  top: 4px;
+  left: 4px;
+  width: 17px;
+  height: 17px;
+  border-radius: 50%;
+  background: var(--primary);
+}
+
+.task-checkmark {
+  position: absolute;
+  top: 7px;
+  left: 0;
+  height: 25px;
+  width: 25px;
+  border: 1px solid #c6bcbc;
+  border-radius: 50%;
+}
+.task-checkmark:after {
+  content: "";
+  position: absolute;
+  display: none;
+  font-size: 20px;
+}
+
+.task-title{
+  text-align: left;
 }
 
 .task-toggle-button {
@@ -160,8 +243,9 @@ button {
 .task-info-pane {
   padding: 5px;
   min-height: 100px;
-  border: 1px solid #d8d0d0;
-  margin-bottom: 10px;
+  border: 1px solid transparent;
+  margin: 1px;
+  background: var(--background);
 }
 
 .hidden {
@@ -218,6 +302,7 @@ button {
 }
 
 .chat-response {
+  position: relative;
   text-align: left;
   padding: 20px;
   overflow: hidden;
@@ -226,4 +311,10 @@ button {
 
 .chat-link-item {
   margin-bottom: 10px;
+}
+
+.chat-search-link {
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
 }
