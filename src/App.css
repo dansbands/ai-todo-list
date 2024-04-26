@@ -56,10 +56,6 @@ button {
   width: 190px;
   text-align: right;
   color: var(--secondary);
-  /* background: var(--main-gradient-left);
-  background-clip: text;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent; */
 }
 
 .App-divider {
@@ -196,12 +192,15 @@ button {
   height: 0;
   width: 0;
 }
+
 .task-checkbox-container input:checked ~ .task-checkmark:after {
   display: block;
 }
+
 .task-checkbox-container:hover input ~ .task-checkmark {
   background-color: #f3eeee;
 }
+
 .task-checkbox-container .task-checkmark:after {
   top: 4px;
   left: 4px;
@@ -220,6 +219,7 @@ button {
   border: 1px solid #c6bcbc;
   border-radius: 50%;
 }
+
 .task-checkmark:after {
   content: "";
   position: absolute;
@@ -227,7 +227,7 @@ button {
   font-size: 20px;
 }
 
-.task-title{
+.task-title {
   text-align: left;
 }
 
