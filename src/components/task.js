@@ -11,7 +11,7 @@ const Task = ({ data, toggleCompleted, deleteTodo }) => {
   const [isControlsOpen, toggleControlsOpen] = useState(false);
   const [isPanelOpen, togglePanelOpen] = useState(false);
 
-  const { title, completed, id, _id } = data;
+  const { title, completed, _id } = data;
 
   return (
     <>
@@ -21,7 +21,7 @@ const Task = ({ data, toggleCompleted, deleteTodo }) => {
             <input
               type="checkbox"
               checked={completed}
-              onChange={() => toggleCompleted(id)}
+              onChange={() => toggleCompleted(_id)}
             />
             <div className="task-checkmark"></div>
           </label>

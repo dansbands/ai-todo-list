@@ -44,7 +44,7 @@ const Tasks = () => {
 
   const toggleCompleted = (id) => {
     const newTasks = [...allTasks];
-    const foundItm = newTasks.find((task) => task.id === id);
+    const foundItm = newTasks.find((task) => task._id === id);
     foundItm.completed = !foundItm.completed;
     completeTodo(foundItm, allTasks, setAllTasks);
 
