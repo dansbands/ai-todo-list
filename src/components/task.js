@@ -6,10 +6,10 @@ import {
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Chat from "./chat";
 
-const Task = ({ data, toggleCompleted }) => {
+const Task = ({ data, toggleCompleted, deleteTodo }) => {
   const [isOpen, toggleOpen] = useState(false);
 
-  const { title, completed, id } = data;
+  const { title, completed, id, _id } = data;
 
   return (
     <>
@@ -25,6 +25,7 @@ const Task = ({ data, toggleCompleted }) => {
           </label>
           <div className="task-title">{title}</div>
         </div>
+        <button onClick={() => deleteTodo(_id)}>X</button>
         <button
           className="task-toggle-button"
           onClick={() => toggleOpen((prevState) => !prevState)}

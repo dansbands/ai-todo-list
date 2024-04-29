@@ -1,46 +1,120 @@
-require("dotenv").config();
 const express = require("express");
+require("dotenv").config();
+const bodyParser = require("body-parser");
+const MongoClient = require("mongodb").MongoClient;
 const axios = require("axios");
 const cors = require("cors");
-
 const app = express();
+
+const { ObjectId } = require("mongodb");
+
 const isDev = process.env.NODE_ENV === "development";
 const corsOptions = {
   origin: "*",
   optionsSuccessStatus: 201, // some legacy browsers (IE11, various SmartTVs) choke on 204
 };
 
-app.use(cors(!isDev ? corsOptions : null));
-app.use(express.json());
+const username = process.env.DB_USERNAME;
+const password = process.env.DB_PASSWORD;
+const connectionString = `mongodb+srv://${username}:${password}@cluster0.uojjxxo.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
 
-const PORT = process.env.PORT || 10000;
+MongoClient.connect(connectionString).then((client) => {
+  console.log("Connected to Database");
+  const db = client.db("ai-todo-list");
+  const todoCollection = db.collection("todos");
+  app.use(bodyParser.urlencoded({ extended: true }));
+  app.use(bodyParser.json());
+  app.use(cors(!isDev ? corsOptions : null));
+  app.use(express.json());
 
-app.get("/", (req, res) => {
-  console.log("We are live");
-  res.send("Got the app!!!");
-});
+  const PORT = process.env.PORT || 10000;
 
-app.post("/api/chat", async (req, res) => {
-  const { message } = req.body;
-  try {
-    const response = await axios.post(
-      "https://api.openai.com/v1/chat/completions",
+  app.get("/", (req, res) => {
+    console.log("We are live");
+    res.send("Got the app!!!");
+  });
+
+  /**
+   * *** TODOS Routes ***
+   */
+
+  app.get("/api/todos", (req, res) => {
+    todoCollection
+      .find()
+      .toArray()
+      .then((results) => res.send(results))
+      .catch((error) => console.error(error));
+  });
+
+  app.post("/api/todos", (req, res) => {
+    todoCollection
+      .insertOne(req.body)
+      // .then((result)) // do something with this
+      .catch((error) => console.error(error));
+  });
+
+  app.put("/api/todos/:id/edit", (req, res) => {
+    console.log("PUT!!!", req.params.id);
+    console.log("BODY!!!", req.body);
+    todoCollection.findOneAndUpdate(
+      { _id: new ObjectId(req.params.id) },
       {
-        model: "gpt-3.5-turbo",
-        messages: [{ role: "user", content: message }],
-      },
-      {
-        headers: {
-          "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`,
-          "Content-Type": "application/json",
+        $set: {
+          title: req.body.title,
+          completed: req.body.completed,
         },
       }
     );
-    res.send(response.data);
-  } catch (error) {
-    console.error(error);
-    res.status(500).send("Error processing the AI request");
-  }
-});
+  });
 
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+  app.put("/api/todos/:id/complete", (req, res) => {
+    console.log("PUT!!!", req.params.id);
+    console.log("BODY!!!", req.body);
+    todoCollection.findOneAndUpdate(
+      { _id: new ObjectId(req.params.id) },
+      {
+        $set: {
+          completed: req.body.completed,
+        },
+      }
+    );
+  });
+
+  app.delete("/api/todos/:id", (req, res) => {
+    console.log("DELETE!!!", req.params.id);
+    console.log("BODY!!!", new ObjectId(req.params.id));
+    todoCollection
+      .deleteOne({ _id: new ObjectId(req.params.id) })
+      .then((result) => {
+        res.json(`Deleted ${req.params.id}`);
+      })
+      .catch((error) => console.error(error));
+  });
+
+  // Chat Routes
+
+  app.post("/api/chat", async (req, res) => {
+    const { message } = req.body;
+    try {
+      const response = await axios.post(
+        "https://api.openai.com/v1/chat/completions",
+        {
+          model: "gpt-3.5-turbo",
+          messages: [{ role: "user", content: message }],
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      res.send(response.data);
+    } catch (error) {
+      console.error(error);
+      res.status(500).send("Error processing the AI request");
+    }
+  });
+
+  app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+});

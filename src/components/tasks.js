@@ -1,39 +1,21 @@
-import React, { useState } from "react";
-import Task from "./task";
-import { v4 as uuid } from "uuid";
+import React, { useEffect, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlus } from "@fortawesome/free-solid-svg-icons";
-
-const exampleTasks = [
-  {
-    title: "Take out trash",
-    dueDate: "11/25/24",
-    completed: false,
-    order: 1,
-    id: uuid(),
-  },
-  {
-    title: "Clean air conditioner filters",
-    dueDate: "11/20/24",
-    completed: false,
-    order: 2,
-    id: uuid(),
-  },
-  {
-    title: "Change oil in car",
-    dueDate: "11/27/24",
-    completed: false,
-    order: 3,
-    id: uuid(),
-  },
-];
+import Task from "./task";
+import { completeTodo, deleteTodo, getTodos, postTodo } from "../util/fetch";
 
 const Tasks = () => {
-  const [allTasks, setAllTasks] = useState([...exampleTasks]);
+  const [allTasks, setAllTasks] = useState([]);
   const [inputValue, setInputValue] = useState("");
   const [inputError, setInputError] = useState(false);
 
-  const handleChange = (val) => {
+  useEffect(() => {
+    getTodos().then((todos) => {
+      if (todos.length !== allTasks.length) setAllTasks(todos);
+    });
+  }, [allTasks]);
+
+  const handleInputChange = (val) => {
     if (inputError) setInputError(false);
     setInputValue(val);
   };
@@ -45,13 +27,11 @@ const Tasks = () => {
   const handleSubmit = () => {
     const newTask = {
       title: inputValue,
-      dueDate: "11/20/24",
       completed: false,
-      order: allTasks.length + 1,
-      id: uuid(),
     };
 
     if (inputValue) {
+      postTodo(newTask, allTasks, setAllTasks);
       setAllTasks((prevState) => [newTask, ...prevState]);
       setInputValue("");
     } else {
@@ -63,6 +43,7 @@ const Tasks = () => {
     const newTasks = [...allTasks];
     const foundItm = newTasks.find((task) => task.id === id);
     foundItm.completed = !foundItm.completed;
+    completeTodo(foundItm, allTasks, setAllTasks)
 
     setAllTasks(newTasks);
   };
@@ -80,7 +61,7 @@ const Tasks = () => {
           <input
             name="task-name"
             value={inputValue}
-            onChange={(e) => handleChange(e.target.value)}
+            onChange={(e) => handleInputChange(e.target.value)}
             onKeyUp={checkForSubmit}
           />
           {inputError && (
@@ -100,11 +81,13 @@ const Tasks = () => {
         {allTasks
           .sort((a, b) => sortByCompleted(a, b))
           .map((taskData) => {
+            const { _id } = taskData;
             return (
               <Task
-                key={taskData.id}
+                key={_id}
                 data={taskData}
                 toggleCompleted={toggleCompleted}
+                deleteTodo={() => deleteTodo(_id, allTasks, setAllTasks)}
               />
             );
           })}

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import { serverUrl } from "../util/fetch";
 
 const Chat = ({ title }) => {
   const [message, setMessage] = useState("");
@@ -7,31 +8,20 @@ const Chat = ({ title }) => {
   const [loading, setLoading] = useState(false);
 
   const prompt = `I need to ${title}. How can I best accomplish this? Additionally, can you please provide a list of web resources for how to ${title} in json format with linkTitle, url, and description? Finally, can you provide an optimized search string on this topic for a google search? Format the entire answer as a json object of {message, links, googleSearch}`;
-  const searchTermQueryString = title.split(" ").join("%20");
+  const searchTermQueryString = title?.split(" ").join("%20");
   const googleLink = `https://www.google.com/search?q=${searchTermQueryString}`;
 
   useEffect(() => {
-    async function fetchData() {
-      const url = process.env.REACT_APP_PROD_SERVER_URL;
-      const message = await axios.get(url, {
-        headers: {
-          "Content-Type": "application/json",
-          "Accept": "application/json",
-        },
-      });
-      console.log('message', message)
-    }
-    fetchData();
-    
     if (title) setMessage(prompt);
   }, [title, prompt]);
 
   const sendMessage = async () => {
     setLoading(true);
-    const url = process.env.REACT_APP_PROD_SERVER_URL;
-    const result = await axios.post(`${url}/api/chat`, {
+
+    const result = await axios.post(`${serverUrl}/api/chat`, {
       message,
     });
+    
     setResponse(JSON.parse(result.data.choices[0].message.content));
     setMessage("");
     setLoading(false);

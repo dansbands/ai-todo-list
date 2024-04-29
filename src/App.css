@@ -101,7 +101,6 @@ button {
 
 .task-form-left {
   width: 85%;
-  margin-right: 20px;
 
   & input {
     border: 1px solid #aea6a6;
