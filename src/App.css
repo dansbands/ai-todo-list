@@ -237,6 +237,27 @@ button {
   text-align: right;
   color: var(--secondary);
   font-size: 20px;
+
+  & svg {
+    transform: rotate(0deg);
+    transition: 0.3s;
+  }
+}
+
+.rotate-90-right {
+  & svg {
+    transform: rotate(90deg);
+    transition: 0.3s;
+  }
+}
+
+.task-delete-button {
+  background-color: transparent;
+  border: none;
+  width: 20%;
+  text-align: right;
+  color: var(--secondary);
+  font-size: 20px;
 }
 
 .task-info-pane {
@@ -278,11 +299,15 @@ button {
 
   & button {
     border: none;
-    border-radius: 25px;
-    width: max-content;
+    border-radius: 10px;
+    width: 100%;
     padding: 10px 20px;
     color: white;
     background: var(--main-gradient-left);
+
+    @media (min-width: 768px) {
+      width: max-content;
+    }
 
     &:hover {
       background: var(--main-gradient-right);

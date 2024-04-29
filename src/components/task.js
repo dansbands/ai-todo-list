@@ -1,8 +1,5 @@
 import React, { useState } from "react";
-import {
-  faChevronDown,
-  faChevronRight,
-} from "@fortawesome/free-solid-svg-icons";
+import { faChevronRight, faTrash } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Chat from "./chat";
 
@@ -25,12 +22,14 @@ const Task = ({ data, toggleCompleted, deleteTodo }) => {
           </label>
           <div className="task-title">{title}</div>
         </div>
-        <button onClick={() => deleteTodo(_id)}>X</button>
+        <button className="task-delete-button" onClick={() => deleteTodo(_id)}>
+          <FontAwesomeIcon icon={faTrash} />
+        </button>
         <button
-          className="task-toggle-button"
+          className={`task-toggle-button ${isOpen && "rotate-90-right"}`}
           onClick={() => toggleOpen((prevState) => !prevState)}
         >
-          <FontAwesomeIcon icon={isOpen ? faChevronDown : faChevronRight} />
+          <FontAwesomeIcon icon={faChevronRight} />
         </button>
       </div>
       <div className={isOpen ? "task-info-pane" : "hidden"}>
