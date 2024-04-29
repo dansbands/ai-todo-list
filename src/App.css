@@ -74,6 +74,10 @@ button {
   }
 }
 
+.loading-indicator {
+  margin-top: 10px;
+}
+
 .task-title {
   margin: 10px;
 }

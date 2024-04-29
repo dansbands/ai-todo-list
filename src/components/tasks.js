@@ -5,13 +5,16 @@ import Task from "./task";
 import { completeTodo, deleteTodo, getTodos, postTodo } from "../util/fetch";
 
 const Tasks = () => {
+  const [pageLoadingState, setPageLoadingState] = useState(null);
   const [allTasks, setAllTasks] = useState([]);
   const [inputValue, setInputValue] = useState("");
   const [inputError, setInputError] = useState(false);
 
   useEffect(() => {
+    setPageLoadingState("loading");
     getTodos().then((todos) => {
       if (todos.length !== allTasks.length) setAllTasks(todos);
+      setPageLoadingState("complete");
     });
   }, [allTasks]);
 
@@ -43,7 +46,7 @@ const Tasks = () => {
     const newTasks = [...allTasks];
     const foundItm = newTasks.find((task) => task.id === id);
     foundItm.completed = !foundItm.completed;
-    completeTodo(foundItm, allTasks, setAllTasks)
+    completeTodo(foundItm, allTasks, setAllTasks);
 
     setAllTasks(newTasks);
   };
@@ -56,6 +59,11 @@ const Tasks = () => {
 
   return (
     <>
+      {pageLoadingState && (
+        <div className="loading-indicator">
+          {pageLoadingState === "loading" ? "Loading resources..." : "Ready"}
+        </div>
+      )}
       <div className="task-form">
         <div className="task-form-left">
           <input
