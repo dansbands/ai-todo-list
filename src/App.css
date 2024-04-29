@@ -237,7 +237,7 @@ button {
 .task-toggle-button {
   background-color: transparent;
   border: none;
-  width: 20%;
+  width: 10%;
   text-align: right;
   color: var(--secondary);
   font-size: 20px;
@@ -255,10 +255,26 @@ button {
   }
 }
 
-.task-delete-button {
+.task-button-container {
+  display: flex;
+  justify-content: space-around;
+  gap: 30px;
+  margin-right: 10px;
+}
+
+.task-controls-button {
   background-color: transparent;
   border: none;
   width: 20%;
+  text-align: right;
+  color: var(--secondary);
+  font-size: 20px;
+}
+
+.task-delete-button {
+  background-color: transparent;
+  border: none;
+  width: 30%;
   text-align: right;
   color: var(--secondary);
   font-size: 20px;
