@@ -331,7 +331,6 @@ button {
 .task-delete-button {
   background-color: transparent;
   border: none;
-  width: 30%;
   text-align: right;
   color: var(--secondary);
   font-size: 20px;
