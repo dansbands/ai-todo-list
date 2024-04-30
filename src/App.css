@@ -1,9 +1,45 @@
 :root {
   --background: #fff;
+  --foreground: #000;
+  --primary-text: #454a5a;
+  --secondary-text: #e0e3ee;
+  --link: #f37d2a;
   --primary: #f59d5e;
   --primaryDark: #f37d2a;
   --secondary: #8c1ce8;
   --tertiary: #1cbfe8;
+  --main-gradient-left: linear-gradient(
+    to right,
+    var(--secondary),
+    var(--primary)
+  );
+  --main-gradient-right: linear-gradient(
+    to left,
+    var(--secondary),
+    var(--primary)
+  );
+  --secondary-gradient-left: linear-gradient(
+    to left,
+    var(--secondary),
+    var(--tertiary)
+  );
+  --secondary-gradient-right: linear-gradient(
+    to right,
+    var(--secondary),
+    var(--tertiary)
+  );
+}
+
+.dark-mode {
+  --background: #000;
+  --foreground: #fff;
+  --primary-text: #e0e3ee;
+  --secondary-text: #454a5a;
+  --link: #1cbfe8;
+  --primary: #f59d5e;
+  --primaryDark: #f37d2a;
+  --tertiary: #8c1ce8;
+  --secondary: #1cbfe8;
   --main-gradient-left: linear-gradient(
     to right,
     var(--secondary),
@@ -42,6 +78,7 @@ button {
   align-items: center;
   justify-content: center;
   font-size: 32px;
+  background: var(--background);
 }
 
 .App-title {
@@ -68,18 +105,35 @@ button {
   padding: 0 20px;
   display: flex;
   flex-direction: column;
+  height: 100vh;
+  background: var(--background);
 
   @media (max-width: 768px) {
     padding: 0 5px;
   }
 }
 
+.color-mode-switch {
+  background: transparent;
+  border: 3px solid var(--foreground);
+  border-radius: 50px;
+  height: 50px;
+  width: 50px;
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  color: var(--foreground);
+  font-size: 30px;
+}
+
 .loading-indicator {
   margin-top: 10px;
+  color: var(--primary-text);
 }
 
 .task-title {
   margin: 10px;
+  color: var(--primary-text);
 }
 
 .task-list {
@@ -351,6 +405,11 @@ button {
   padding: 20px;
   overflow: hidden;
   overflow-wrap: break-word;
+  color: var(--primary-text);
+  
+  & a {
+    color: var(--link);
+  }
 }
 
 .chat-link-item {
@@ -361,4 +420,5 @@ button {
   position: absolute;
   right: 10px;
   bottom: 10px;
+  color: var(--link);
 }
