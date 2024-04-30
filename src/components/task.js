@@ -40,15 +40,15 @@ const Task = ({ data, toggleCompleted, deleteTodo }) => {
           >
             <FontAwesomeIcon icon={faChevronRight} />
           </button>
+          {isControlsOpen && (
+            <button
+              className="task-delete-button"
+              onClick={() => deleteTodo(_id)}
+            >
+              <FontAwesomeIcon icon={faTrash} />
+            </button>
+          )}
         </div>
-        {isControlsOpen && (
-          <button
-            className="task-delete-button"
-            onClick={() => deleteTodo(_id)}
-          >
-            <FontAwesomeIcon icon={faTrash} />
-          </button>
-        )}
       </div>
       <div className={isPanelOpen ? "task-info-pane" : "hidden"}>
         <Chat title={title} />
