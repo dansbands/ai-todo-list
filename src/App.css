@@ -130,8 +130,15 @@ button {
 }
 
 .loading-indicator {
-  margin-top: 10px;
-  color: var(--primary-text);
+  height: 100%;
+  display: flex;
+  justify-content: center;
+
+  & img {
+    margin-top: 30vh;
+    width: 100px;
+    height: 75px;
+  }
 }
 
 .task-title {
