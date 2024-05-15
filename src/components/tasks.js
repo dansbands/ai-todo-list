@@ -3,7 +3,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlus } from "@fortawesome/free-solid-svg-icons";
 import Task from "./task";
 import { completeTodo, deleteTodo, getTodos, postTodo } from "../util/fetch";
-import loadingGif from '../img/loading.gif';
+import Loader from "./loader";
 
 const Tasks = () => {
   const [pageLoadingState, setPageLoadingState] = useState(null);
@@ -14,10 +14,10 @@ const Tasks = () => {
   useEffect(() => {
     setPageLoadingState("loading");
     getTodos().then((todos) => {
-      if (todos.length !== allTasks.length) setAllTasks(todos);
+      setAllTasks(todos);
       setPageLoadingState("complete");
     });
-  }, [allTasks]);
+  }, []);
 
   const handleInputChange = (val) => {
     if (inputError) setInputError(false);
@@ -60,9 +60,9 @@ const Tasks = () => {
 
   return (
     <>
-      {(pageLoadingState && pageLoadingState === "loading") ? (
+      {pageLoadingState && pageLoadingState === "loading" ? (
         <div className="loading-indicator">
-          <img src={loadingGif} alt="loading-image" />
+          <Loader />
         </div>
       ) : (
         <>

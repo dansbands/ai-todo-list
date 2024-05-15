@@ -11,7 +11,6 @@ function App() {
   const switchColorMode = () => {
     setIsLight(prevState => !prevState);
     const rootElement = document.body;
-    console.log('rootElement', rootElement)
     rootElement.classList.toggle("dark-mode")
   };
 
