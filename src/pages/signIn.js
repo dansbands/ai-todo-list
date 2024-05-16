@@ -6,6 +6,7 @@ const SignIn = () => {
     <>
       <div>Sign In</div>
       <Link to="/sign-up">Sign Up instead</Link>
+      <Link to="/">Home</Link>
     </>
   );
 };
