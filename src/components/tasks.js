@@ -62,7 +62,7 @@ const Tasks = () => {
     <>
       {(pageLoadingState && pageLoadingState === "loading") ? (
         <div className="loading-indicator">
-          <img src={loadingGif} alt="loading-image" />
+          <img src={loadingGif} />
         </div>
       ) : (
         <>
