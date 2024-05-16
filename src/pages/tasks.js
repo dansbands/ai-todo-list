@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlus } from "@fortawesome/free-solid-svg-icons";
-import Task from "./task";
+import Task from "../components/task";
 import { completeTodo, deleteTodo, getTodos, postTodo } from "../util/fetch";
 import loadingGif from '../img/loading.gif';
 

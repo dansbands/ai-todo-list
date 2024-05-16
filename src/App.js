@@ -1,11 +1,19 @@
 import "./App.css";
-import Tasks from "./components/tasks";
+import { Routes, Route } from "react-router-dom";
+
 import Layout from "./components/layout";
+import Tasks from "./pages/tasks";
+import SignIn from "./pages/signIn";
+import SignUp from "./pages/signUp";
 
 function App() {
   return (
     <Layout>
-      <Tasks />
+      <Routes path="/">
+        <Route index element={<Tasks />} />
+        <Route path="sign-in" element={<SignIn />} />
+        <Route path="sign-up" element={<SignUp />} />
+      </Routes>
     </Layout>
   );
 }

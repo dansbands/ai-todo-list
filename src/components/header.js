@@ -19,7 +19,7 @@ const Header = () => {
             User Name
           </div>
         ) : (
-          <a className="App-login" href="/">
+          <a className="App-login" href="/sign-in">
             <FontAwesomeIcon icon={faRightToBracket} />
             Log In
           </a>
