@@ -1,7 +1,7 @@
 {
   "name": "ai-todo-list",
   "version": "0.1.0",
-  "homepage": "https://dansbands.github.io/ai-todo-list",
+  "homepage": "https://dansbands.github.io/ai-todo-list/#",
   "private": true,
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^6.5.2",

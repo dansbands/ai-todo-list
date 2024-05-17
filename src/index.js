@@ -6,13 +6,13 @@ import reportWebVitals from "./reportWebVitals";
 import { BrowserRouter } from "react-router-dom";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
-const basename = process.env.NODE_ENV === 'development' ? '/' : '/ai-todo-list'; 
-console.log('basename', basename)
-console.log('process.env.NODE_ENV', process.env.NODE_ENV)
+// const basename = process.env.NODE_ENV === 'development' ? '/' : '/ai-todo-list'; 
+// console.log('basename', basename)
+// console.log('process.env.NODE_ENV', process.env.NODE_ENV)
 
 root.render(
   <React.StrictMode>
-    <BrowserRouter basename={basename}>
+    <BrowserRouter>
       <App />
     </BrowserRouter>
   </React.StrictMode>
