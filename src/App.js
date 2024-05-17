@@ -7,14 +7,16 @@ import SignIn from "./pages/signIn";
 import SignUp from "./pages/signUp";
 
 const basename = process.env.NODE_ENV === "development" ? "/" : "/ai-todo-list";
-console.log('index')
+console.log('Hash')
+
 function App() {
   return (
     <Layout>
-      <Routes basename={basename}>
+      <Routes>
         <Route index element={<Tasks />} />
         <Route path="sign-in" element={<SignIn />} />
         <Route path="sign-up" element={<SignUp />} />
+        {/* <Route path="/*" element={<Tasks />} /> */}
       </Routes>
     </Layout>
   );

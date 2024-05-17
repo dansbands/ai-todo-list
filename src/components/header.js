@@ -1,5 +1,6 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faRightToBracket, faUser } from "@fortawesome/free-solid-svg-icons";
+import { Link } from "react-router-dom";
 
 const Header = () => {
   let loggedIn = false; // replace with Auth, route "Log In" to /login screen
@@ -19,10 +20,10 @@ const Header = () => {
             User Name
           </div>
         ) : (
-          <a className="App-login" href="/sign-in">
+          <Link className="App-login" to="/sign-in">
             <FontAwesomeIcon icon={faRightToBracket} />
             Log In
-          </a>
+          </Link>
         )}
       </div>
     </header>
