@@ -1,12 +1,12 @@
 const express = require("express");
 require("dotenv").config();
 const bodyParser = require("body-parser");
-const MongoClient = require("mongodb").MongoClient;
+const { MongoClient, ObjectId } = require("mongodb");
 const axios = require("axios");
 const cors = require("cors");
+const jwt = require("jsonwebtoken");
+const bcrypt = require("bcrypt");
 const app = express();
-
-const { ObjectId } = require("mongodb");
 
 const isDev = process.env.NODE_ENV === "development";
 const corsOptions = {
@@ -19,9 +19,10 @@ const password = process.env.DB_PASSWORD;
 const connectionString = `mongodb+srv://${username}:${password}@cluster0.uojjxxo.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
 
 MongoClient.connect(connectionString).then((client) => {
-  console.log("Connected to Database");
   const db = client.db("ai-todo-list");
   const todoCollection = db.collection("todos");
+  const usersCollection = db.collection("users");
+
   app.use(bodyParser.urlencoded({ extended: true }));
   app.use(bodyParser.json());
   app.use(cors(!isDev ? corsOptions : null));
@@ -30,8 +31,80 @@ MongoClient.connect(connectionString).then((client) => {
   const PORT = process.env.PORT || 10000;
 
   app.get("/", (req, res) => {
-    console.log("We are live");
     res.send("Got the app!!!");
+  });
+
+  /**
+   * *** USERS Routes ***
+   */
+  app.get("/user", async (req, res) => {
+    const token = req.headers("authorization");
+    if (!token) return res.status(401).send("Access denied. No token provided");
+    const decoded = await jwt.verify(token, process.env.JWT_PRIVATE_KEY);
+    console.log({decoded});
+    console.log("req", req.user);
+    usersCollection
+      .findOne({ _id: ObjectId(decoded._id) })
+      .catch((err) => console.log("User Error", err))
+      .then((user) => {
+        console.log("user", user);
+        res.status(200).send({
+          _id: user?._id,
+          firstName: user?.firstName,
+          lastName: user?.lastName,
+          email: user?.email,
+        });
+      });
+  });
+
+  app.post("/signup", async (req, res) => {
+    let user = await usersCollection.findOne({ email: req.body.email });
+    if (user) return res.status(400).send({ error: "User already registered" });
+
+    user = req.body;
+    console.log("body", user);
+    user.password = await bcrypt.hash(user.password, 10);
+    usersCollection
+      .insertOne(user)
+      .then((result) => {
+        console.log("result", result);
+        console.log("process.env.JWT_PRIVATE_KEY", process.env.JWT_PRIVATE_KEY);
+        const token = jwt.sign(
+          { _id: result._id },
+          process.env.JWT_PRIVATE_KEY,
+          // { expiresIn: "1800s" }
+        );
+        res.header("x-auth-token", token).send({
+          _id: user._id,
+          name: user.name,
+          email: user.email,
+        });
+      })
+      .catch((error) => console.error(error));
+  });
+
+  app.post("/signin", async (req, res) => {
+    let user = await usersCollection.findOne({ email: req.body.email });
+    let pwMatch = false;
+    if (user) {
+      pwMatch = await bcrypt.compare(req.body.password, user.password);
+    }
+    if (!user) {
+      return res.status(400).send({ error: "User does not exist" });
+    } else if (user && pwMatch) {
+      const token = jwt.sign({ _id: user._id }, process.env.JWT_PRIVATE_KEY);
+      res.header("Authorization", token).status(200).send({
+        token,
+        _id: user._id,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+      });
+    } else {
+      res
+        .status(401)
+        .send({ error: "Invalid username and password combination" });
+    }
   });
 
   /**
