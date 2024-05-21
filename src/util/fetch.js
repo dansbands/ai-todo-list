@@ -9,6 +9,15 @@ const headers = {
   Accept: "application/json",
 };
 const todosUrl = `${serverUrl}/api/todos`;
+const userTodosUrl = `${serverUrl}/api/user/todos`;
+
+export const getUserTodos = async (userId) => {
+  const message = await axios.post(userTodosUrl, {
+    userId,
+    headers,
+  });
+  return message.data;
+};
 
 export const getTodos = async () => {
   const message = await axios.get(todosUrl, {
@@ -63,21 +72,21 @@ export const deleteTodo = async (id, tasks, setTasks) => {
 };
 
 export const postNewUser = async (formValues) => {
-  const url = `${serverUrl}/signup`
+  const url = `${serverUrl}/signup`;
 
   const data = await axios.post(url, {
     ...formValues,
     headers,
-  })
+  });
   return data;
-}
+};
 
 export const postExistingUser = async (formValues) => {
-  const url = `${serverUrl}/signin`
+  const url = `${serverUrl}/signin`;
 
   const data = await axios.post(url, {
     ...formValues,
     headers,
-  })
+  });
   return data;
-}
+};

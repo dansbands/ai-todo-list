@@ -68,7 +68,6 @@ const SignIn = () => {
           </button>
           <div className="sign-up-links">
             <Link to="/sign-up">Sign Up instead</Link>
-            <Link to="/">Home</Link>
           </div>
         </div>
       )}

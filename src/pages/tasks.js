@@ -2,7 +2,12 @@ import React, { useEffect, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlus } from "@fortawesome/free-solid-svg-icons";
 import Task from "../components/task";
-import { completeTodo, deleteTodo, getTodos, postTodo } from "../util/fetch";
+import {
+  completeTodo,
+  deleteTodo,
+  getUserTodos,
+  postTodo,
+} from "../util/fetch";
 import loadingGif from "../img/loading.gif";
 import Input from "./input";
 import { useAuth } from "../components/auth";
@@ -16,7 +21,7 @@ const Tasks = () => {
 
   useEffect(() => {
     setPageLoadingState("loading");
-    getTodos().then((todos) => {
+    getUserTodos(auth.user._id).then((todos) => {
       if (todos.length !== allTasks.length) setAllTasks(todos);
       setPageLoadingState("complete");
     });

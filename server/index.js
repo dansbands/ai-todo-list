@@ -107,6 +107,14 @@ MongoClient.connect(connectionString).then((client) => {
    * *** TODOS Routes ***
    */
 
+  app.post("/api/user/todos", (req, res) => {
+    const todos = todoCollection.find({ userId: req.body.userId })
+    todos
+      .toArray()
+      .then((results) => res.send(results))
+      .catch((error) => console.error(error));
+  });
+
   app.get("/api/todos", (req, res) => {
     todoCollection
       .find()
