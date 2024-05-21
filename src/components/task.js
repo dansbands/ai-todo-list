@@ -10,8 +10,8 @@ import Chat from "./chat";
 const Task = ({ data, toggleCompleted, deleteTodo }) => {
   const [isControlsOpen, toggleControlsOpen] = useState(false);
   const [isPanelOpen, togglePanelOpen] = useState(false);
-
-  const { title, completed, _id } = data;
+  
+  const { title, completed, _id, response } = data;
 
   return (
     <>
@@ -51,7 +51,7 @@ const Task = ({ data, toggleCompleted, deleteTodo }) => {
         </div>
       </div>
       <div className={isPanelOpen ? "task-info-pane" : "hidden"}>
-        <Chat title={title} />
+        <Chat title={title} todoId={_id} chatResponse={response} />
       </div>
     </>
   );

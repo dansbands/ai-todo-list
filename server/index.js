@@ -171,7 +171,7 @@ MongoClient.connect(connectionString).then((client) => {
   // Chat Routes
 
   app.post("/api/chat", async (req, res) => {
-    const { message } = req.body;
+    const { message, todoId } = req.body;
     try {
       const response = await axios.post(
         "https://api.openai.com/v1/chat/completions",
@@ -183,6 +183,14 @@ MongoClient.connect(connectionString).then((client) => {
           headers: {
             Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
             "Content-Type": "application/json",
+          },
+        }
+      );
+      todoCollection.findOneAndUpdate(
+        { _id: new ObjectId(todoId) },
+        {
+          $set: {
+            response: response.data,
           },
         }
       );
