@@ -5,12 +5,14 @@ import Task from "../components/task";
 import { completeTodo, deleteTodo, getTodos, postTodo } from "../util/fetch";
 import loadingGif from "../img/loading.gif";
 import Input from "./input";
+import { useAuth } from "../components/auth";
 
 const Tasks = () => {
   const [pageLoadingState, setPageLoadingState] = useState(null);
   const [allTasks, setAllTasks] = useState([]);
-  const [inputValue, setInputValue] = useState("");
-  const [inputError, setInputError] = useState(false);
+  const [inputValue, setInputValue] = useState({ taskName: "" });
+  const [inputError, setInputError] = useState({ taskName: false });
+  const auth = useAuth();
 
   useEffect(() => {
     setPageLoadingState("loading");
@@ -22,8 +24,9 @@ const Tasks = () => {
 
   const handleSubmit = () => {
     const newTask = {
-      title: inputValue,
+      title: inputValue.taskName,
       completed: false,
+      userId: auth.user._id,
     };
 
     if (inputValue) {
@@ -61,12 +64,12 @@ const Tasks = () => {
           <div className="task-form">
             <div className="task-form-left">
               <Input
-                inputName="task-name"
-                inputValue={inputValue}
+                name="taskName"
+                inputValue={inputValue?.taskName}
+                inputError={inputError?.taskName}
                 setInputValue={setInputValue}
-                handleSubmit={handleSubmit}
-                inputError={inputError}
                 setInputError={setInputError}
+                handleSubmit={handleSubmit}
               />
             </div>
             <div className="task-form-right">
