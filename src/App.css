@@ -124,6 +124,11 @@ button {
       & svg {
         margin-right: 5px;
       }
+      & button {
+        background-color: var(--background);
+        color: var(--secondary);
+        border: none;
+      }
     }
 
     & .App-user {
@@ -221,19 +226,18 @@ button {
   flex-direction: column;
   & label {
     text-align: left;
-    color: var(--foreground) 
+    color: var(--foreground);
   }
 }
 
 .sign-up-form {
-  width: 50%;
+  width: 90%;
   display: flex;
   flex-direction: column;
   margin: 20px auto;
 
-  @media (max-width: 768px) {
-    width: 90%;
-    margin: 0 auto;
+  @media (min-width: 768px) {
+    width: 50%;
   }
 
   .form-title {
@@ -282,6 +286,13 @@ button {
       text-decoration: none;
     }
   }
+}
+
+.auth-error {
+  color: var(--primary);
+  align-self: flex-start;
+  margin-bottom: 20px;
+  font-size: 16px;
 }
 
 .task-form-left {

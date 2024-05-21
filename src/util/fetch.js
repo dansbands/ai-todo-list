@@ -61,3 +61,23 @@ export const deleteTodo = async (id, tasks, setTasks) => {
       if (todos.length !== tasks.length) setTasks(todos);
     });
 };
+
+export const postNewUser = async (formValues) => {
+  const url = `${serverUrl}/signup`
+
+  const data = await axios.post(url, {
+    ...formValues,
+    headers,
+  })
+  return data;
+}
+
+export const postExistingUser = async (formValues) => {
+  const url = `${serverUrl}/signin`
+
+  const data = await axios.post(url, {
+    ...formValues,
+    headers,
+  })
+  return data;
+}

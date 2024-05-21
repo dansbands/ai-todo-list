@@ -41,13 +41,10 @@ MongoClient.connect(connectionString).then((client) => {
     const token = req.headers("authorization");
     if (!token) return res.status(401).send("Access denied. No token provided");
     const decoded = await jwt.verify(token, process.env.JWT_PRIVATE_KEY);
-    console.log({decoded});
-    console.log("req", req.user);
     usersCollection
       .findOne({ _id: ObjectId(decoded._id) })
       .catch((err) => console.log("User Error", err))
       .then((user) => {
-        console.log("user", user);
         res.status(200).send({
           _id: user?._id,
           firstName: user?.firstName,
@@ -62,21 +59,20 @@ MongoClient.connect(connectionString).then((client) => {
     if (user) return res.status(400).send({ error: "User already registered" });
 
     user = req.body;
-    console.log("body", user);
     user.password = await bcrypt.hash(user.password, 10);
     usersCollection
       .insertOne(user)
       .then((result) => {
-        console.log("result", result);
-        console.log("process.env.JWT_PRIVATE_KEY", process.env.JWT_PRIVATE_KEY);
         const token = jwt.sign(
           { _id: result._id },
-          process.env.JWT_PRIVATE_KEY,
+          process.env.JWT_PRIVATE_KEY
           // { expiresIn: "1800s" }
         );
         res.header("x-auth-token", token).send({
+          token,
           _id: user._id,
-          name: user.name,
+          firstName: user.firstName,
+          lastName: user.lastName,
           email: user.email,
         });
       })

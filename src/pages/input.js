@@ -9,9 +9,12 @@ const Input = ({
   inputError,
   setInputError,
 }) => {
-  const handleInputChange = (val) => {
-    if (inputError) setInputError(false);
-    setInputValue(val);
+  const handleInputChange = (e) => {
+    if (inputError) setInputError({[title]: false});
+    setInputValue((prevState) => ({
+      ...prevState,
+      [e.target.name]: e.target.value,
+    }));
   };
 
   const checkForSubmit = (e) => {
@@ -20,12 +23,12 @@ const Input = ({
 
   return (
     <div className="form-input-group">
-      <label for={name}>{title}</label>
+      <label htmlFor={name}>{title}</label>
       <input
         className="form-input"
         name={name}
         value={inputValue}
-        onChange={(e) => handleInputChange(e.target.value)}
+        onChange={handleInputChange}
         onKeyUp={checkForSubmit}
       />
       {inputError && (

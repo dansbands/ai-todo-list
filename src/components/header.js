@@ -1,9 +1,11 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faRightToBracket, faUser } from "@fortawesome/free-solid-svg-icons";
-import { Link } from "react-router-dom";
+import { Link, Navigate, redirect, useNavigate } from "react-router-dom";
+import { useAuth } from "./auth";
 
 const Header = () => {
-  let loggedIn = false; // replace with Auth, route "Log In" to /login screen
+  const auth = useAuth();
+  const navigate = useNavigate();
 
   return (
     <header className="App-header">
@@ -14,11 +16,18 @@ const Header = () => {
         </div>
       </div>
       <div className="App-header-right">
-        {loggedIn ? (
-          <div className="App-user">
-            <FontAwesomeIcon icon={faUser} />
-            User Name
-          </div>
+        {auth.user ? (
+          <Link className="App-login" to="/sign-in">
+            <button
+              className="App-user"
+              onClick={() => {
+                auth.signOut(() => navigate("/sign-in"));
+              }}
+            >
+              <FontAwesomeIcon icon={faUser} />
+              {auth.user.firstName}
+            </button>
+          </Link>
         ) : (
           <Link className="App-login" to="/sign-in">
             <FontAwesomeIcon icon={faRightToBracket} />
