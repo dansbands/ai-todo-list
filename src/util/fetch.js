@@ -8,8 +8,16 @@ const headers = {
   "Content-Type": "application/json",
   Accept: "application/json",
 };
+const appUrl = `${serverUrl}/`;
 const todosUrl = `${serverUrl}/api/todos`;
 const userTodosUrl = `${serverUrl}/api/user/todos`;
+
+export const getApp = async () => {
+  const message = await axios.get(appUrl, {
+    headers,
+  })
+  return message.data;
+}
 
 export const getUserTodos = async (userId) => {
   const message = await axios.post(userTodosUrl, {

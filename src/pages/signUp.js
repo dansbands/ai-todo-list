@@ -1,10 +1,12 @@
-import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { Link, Navigate, useNavigate } from "react-router-dom";
 import Input from "./input";
-import { postNewUser } from "../util/fetch";
+import loadingGif from "../img/loading.gif";
+import { getApp, postNewUser } from "../util/fetch";
 import { useAuth } from "../components/auth";
 
 const SignUp = () => {
+  const [pageLoadingState, setPageLoadingState] = useState(null);
   const [inputValue, setInputValue] = useState({
     firstName: "",
     lastName: "",
@@ -20,6 +22,14 @@ const SignUp = () => {
   const auth = useAuth();
   const navigate = useNavigate();
 
+  useEffect(() => {
+    setPageLoadingState("loading");
+    getApp()
+      .then((res) => console.log(res))
+      .then(() => setPageLoadingState("complete"))
+      .catch(() => setPageLoadingState("error"));
+  }, []);
+
   const handleSubmit = () => {
     if (
       inputValue.firstName &&
@@ -28,8 +38,6 @@ const SignUp = () => {
       inputValue.password
     ) {
       postNewUser(inputValue).then((res) => {
-        console.log('res', res)
-        // localStorage.setItem("token", res.data.token);
         auth.signIn(res.data, () => navigate("/"));
       }); // handle res from from server/index.js
       setInputValue({
@@ -47,6 +55,32 @@ const SignUp = () => {
       });
     }
   };
+
+  if (localStorage.getItem("token")) {
+    return <Navigate to="/" />;
+  }
+
+  if (pageLoadingState && pageLoadingState === "loading") {
+    return (
+      <div className="sign-up-form">
+        <div className="loading-indicator">
+          <img src={loadingGif} alt="loader" />
+          <div>Loading...</div>
+          <div>This usually takes a minute</div>
+        </div>
+      </div>
+    );
+  }
+
+  if (pageLoadingState && pageLoadingState === "error") {
+    return (
+      <div className="sign-up-form">
+        <div className="loading-indicator">
+          <div>Something went wrong</div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <>

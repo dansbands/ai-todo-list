@@ -64,6 +64,7 @@
 
 body {
   background-color: var(--background);
+  color: var(--foreground);
   padding-bottom: 50px;
 }
 
@@ -176,12 +177,18 @@ button {
 .loading-indicator {
   height: 100%;
   display: flex;
+  flex-direction: column;
   justify-content: center;
+  align-items: center;
 
   & img {
     margin-top: 30vh;
     width: 100px;
     height: 75px;
+  }
+
+  & div {
+    margin: 20px;;
   }
 }
 

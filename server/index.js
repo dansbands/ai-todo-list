@@ -31,7 +31,13 @@ MongoClient.connect(connectionString).then((client) => {
   const PORT = process.env.PORT || 10000;
 
   app.get("/", (req, res) => {
-    res.send("Got the app!!!");
+    if (isDev) {
+      setTimeout(() => {
+        res.send("Got the app!!!");
+      }, 10000);
+    } else {
+      res.send("Got the app!!!");
+    }
   });
 
   /**
@@ -108,7 +114,7 @@ MongoClient.connect(connectionString).then((client) => {
    */
 
   app.post("/api/user/todos", (req, res) => {
-    const todos = todoCollection.find({ userId: req.body.userId })
+    const todos = todoCollection.find({ userId: req.body.userId });
     todos
       .toArray()
       .then((results) => res.send(results))
