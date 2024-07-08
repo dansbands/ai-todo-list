@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { Link, Navigate, useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Input from "./input";
-import loadingGif from "../img/loading.gif";
 import { getApp, postNewUser } from "../util/fetch";
 import { useAuth } from "../components/auth";
+import LoadingWrapper from "../components/loading-wrapper";
 
 const SignUp = () => {
   const [pageLoadingState, setPageLoadingState] = useState(null);
@@ -56,34 +56,8 @@ const SignUp = () => {
     }
   };
 
-  if (localStorage.getItem("token")) {
-    return <Navigate to="/" />;
-  }
-
-  if (pageLoadingState && pageLoadingState === "loading") {
-    return (
-      <div className="sign-up-form">
-        <div className="loading-indicator">
-          <img src={loadingGif} alt="loader" />
-          <div>Loading...</div>
-          <div>This usually takes a minute</div>
-        </div>
-      </div>
-    );
-  }
-
-  if (pageLoadingState && pageLoadingState === "error") {
-    return (
-      <div className="sign-up-form">
-        <div className="loading-indicator">
-          <div>Something went wrong</div>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <>
+    <LoadingWrapper pageLoadingState={pageLoadingState}>
       <div className="sign-up-form">
         <div className="form-title">Sign Up</div>
         <Input
@@ -129,7 +103,7 @@ const SignUp = () => {
           <Link to="/sign-in">Sign In instead</Link>
         </div>
       </div>
-    </>
+    </LoadingWrapper>
   );
 };
 

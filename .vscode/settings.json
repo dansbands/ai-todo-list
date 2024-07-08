@@ -1,3 +1,21 @@
 {
-  "eslint.nodePath": "/Users/Dan/.nvm/versions/node/v16.13.2/bin/node"
+  "eslint.nodePath": "/Users/Dan/.nvm/versions/node/v16.13.2/bin/node",
+  // "workbench.colorCustomizations": {
+  //   "titleBar.activeForeground": "#000",
+  //   "titleBar.inactiveForeground": "#000000CC",
+  //   "titleBar.activeBackground": "#00ff2f",
+  //   "titleBar.inactiveBackground": "#00ff2fc4"
+  // }
+  "workbench.colorCustomizations": {
+    "titleBar.activeForeground": "#000",
+    "titleBar.inactiveForeground": "#000000CC",
+    "titleBar.activeBackground": "#ffe100",
+    "titleBar.inactiveBackground": "#ffe100e2"
+  },
+  // "workbench.colorCustomizations": {
+  //   "titleBar.activeForeground": "#000",
+  //   "titleBar.inactiveForeground": "#000000CC",
+  //   "titleBar.activeBackground": "#00e5ff",
+  //   "titleBar.inactiveBackground": "#0cc3d7"
+  // }
 }

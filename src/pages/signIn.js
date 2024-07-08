@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { Link, Navigate, useNavigate, useLocation } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Input from "./input";
-import loadingGif from "../img/loading.gif";
 import { getApp, postExistingUser } from "../util/fetch";
 import { useAuth } from "../components/auth";
+import LoadingWrapper from "../components/loading-wrapper";
 
 const SignIn = () => {
   const [pageLoadingState, setPageLoadingState] = useState(null);
@@ -13,7 +13,7 @@ const SignIn = () => {
     email: false,
     password: false,
   });
-  
+
   const auth = useAuth();
   const navigate = useNavigate();
 
@@ -44,61 +44,37 @@ const SignIn = () => {
     }
   };
 
-  if (localStorage.getItem("token")) {
-    return <Navigate to="/" />;
-  }
-
-  if (pageLoadingState && pageLoadingState === "loading") {
-    return (
-      <div className="sign-up-form">
-        <div className="loading-indicator">
-          <img src={loadingGif} alt="loader" />
-          <div>Loading...</div>
-          <div>This usually takes a minute</div>
-        </div>
-      </div>
-    );
-  }
-
-  if (pageLoadingState && pageLoadingState === "error") {
-    return (
-      <div className="sign-up-form">
-        <div className="loading-indicator">
-          <div>Something went wrong</div>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="sign-up-form">
-      <div className="form-title">Sign In</div>
-      <Input
-        name="email"
-        title="Email"
-        inputValue={inputValue?.email}
-        inputError={inputError?.email}
-        setInputValue={setInputValue}
-        setInputError={setInputError}
-        handleSubmit={handleSubmit}
-      />
-      <Input
-        name="password"
-        title="Password"
-        inputValue={inputValue?.password}
-        inputError={inputError?.password}
-        setInputValue={setInputValue}
-        setInputError={setInputError}
-        handleSubmit={handleSubmit}
-      />
-      {authError && <div className="auth-error">{authError}</div>}
-      <button type="submit" onClick={handleSubmit}>
-        Sign In
-      </button>
-      <div className="sign-up-links">
-        <Link to="/sign-up">Sign Up instead</Link>
+    <LoadingWrapper pageLoadingState={pageLoadingState}>
+      <div className="sign-up-form">
+        <div className="form-title">Sign In</div>
+        <Input
+          name="email"
+          title="Email"
+          inputValue={inputValue?.email}
+          inputError={inputError?.email}
+          setInputValue={setInputValue}
+          setInputError={setInputError}
+          handleSubmit={handleSubmit}
+        />
+        <Input
+          name="password"
+          title="Password"
+          inputValue={inputValue?.password}
+          inputError={inputError?.password}
+          setInputValue={setInputValue}
+          setInputError={setInputError}
+          handleSubmit={handleSubmit}
+        />
+        {authError && <div className="auth-error">{authError}</div>}
+        <button type="submit" onClick={handleSubmit}>
+          Sign In
+        </button>
+        <div className="sign-up-links">
+          <Link to="/sign-up">Sign Up instead</Link>
+        </div>
       </div>
-    </div>
+    </LoadingWrapper>
   );
 };
 
