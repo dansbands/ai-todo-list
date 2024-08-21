@@ -1,8 +1,9 @@
 import { Navigate } from "react-router-dom";
 import loadingGif from "../img/loading.gif";
+import ElevatorPitch from "./elevator-pitch";
+import { featureFlags } from "../util/feature-flags";
 
-
-const LoadingWrapper = ({children, pageLoadingState}) => {
+const LoadingWrapper = ({ children, pageLoadingState }) => {
   if (localStorage.getItem("token")) {
     return <Navigate to="/" />;
   }
@@ -13,7 +14,7 @@ const LoadingWrapper = ({children, pageLoadingState}) => {
         <div className="loading-indicator">
           <img src={loadingGif} alt="loader" />
           <div>Loading...</div>
-          <div>This usually takes a minute</div>
+          {featureFlags.hasElevatorPitch ? <ElevatorPitch /> : <div>This usually takes a minute</div>}
         </div>
       </div>
     );
@@ -28,9 +29,7 @@ const LoadingWrapper = ({children, pageLoadingState}) => {
       </div>
     );
   }
-  return (
-    <>{children}</>
-  )
-}
+  return <>{children}</>;
+};
 
-export default LoadingWrapper
+export default LoadingWrapper;
