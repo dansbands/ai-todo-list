@@ -34,7 +34,7 @@ MongoClient.connect(connectionString).then((client) => {
     if (isDev) {
       setTimeout(() => {
         res.send("Got the app!!!");
-      }, 10000);
+      }, 1000);
     } else {
       res.send("Got the app!!!");
     }

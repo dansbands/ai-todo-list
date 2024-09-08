@@ -7,7 +7,7 @@ import LoadingWrapper from "../components/loading-wrapper";
 
 const SignIn = () => {
   const [pageLoadingState, setPageLoadingState] = useState(null);
-  const [inputValue, setInputValue] = useState({ email: "", password: "" });
+  const [inputValue, setInputValue] = useState({ email: "guest@guest.com", password: "abc123" });
   const [authError, setAuthError] = useState("");
   const [inputError, setInputError] = useState({
     email: false,
