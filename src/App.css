@@ -195,6 +195,10 @@ button {
 .task-title {
   margin: 10px;
   color: var(--primary-text);
+  max-width: 50vw;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 
 .task-list {
@@ -351,11 +355,11 @@ button {
 }
 
 .task-row {
-  color: #454a5a;
   display: flex;
-  font-size: 18px;
   justify-content: space-between;
   align-items: center;
+  border-bottom: 1px solid #ddd;
+  color:  var(--primary-text);
   background: var(--background);
   margin-bottom: 1px;
   text-align: left;
@@ -363,9 +367,16 @@ button {
 
 .task-row-left {
   display: flex;
+  align-items: center;
   flex-direction: row;
   width: 300px;
   padding: 10px;
+}
+
+.task-title {
+  margin-left: 10px;
+  font-size: 16px;
+  text-align: left;
 }
 
 .task-checkbox-container {
@@ -408,7 +419,7 @@ button {
 
 .task-checkmark {
   position: absolute;
-  top: 7px;
+  top: -10px;
   left: 0;
   height: 25px;
   width: 25px;
@@ -421,10 +432,6 @@ button {
   position: absolute;
   display: none;
   font-size: 20px;
-}
-
-.task-title {
-  text-align: left;
 }
 
 .task-toggle-button {
@@ -451,18 +458,19 @@ button {
 
 .task-button-container {
   display: flex;
+  align-items: center;
   justify-content: space-around;
-  gap: 30px;
+  gap: 10px;
   height: 60px;
 }
 
-.task-controls-button {
-  background-color: transparent;
+.task-controls-button,
+.task-toggle-button,
+.task-delete-button {
+  background: none;
   border: none;
-  width: 20%;
-  text-align: right;
-  color: var(--secondary);
-  font-size: 20px;
+  cursor: pointer;
+  font-size: 16px;
 }
 
 .task-delete-button {
@@ -488,6 +496,26 @@ button {
   &:last-of-type {
     padding-bottom: 75px;
   }
+}
+
+.task-panel {
+  background: var(--background);
+  border: 1px solid transparent;
+  padding: 5px 5px 0 5px;
+  max-height: 0;
+  overflow: hidden;
+  transition: all 0.3s ease-out;
+}
+
+.task-panel.open {
+  padding: 5px;
+  margin: 2px;
+  max-height: 600px; /* Adjust based on the content height */
+}
+
+.task-panel.closed {
+  max-height: 0;
+  padding: 0;
 }
 
 .hidden {

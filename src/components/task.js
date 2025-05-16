@@ -8,10 +8,18 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Chat from "./chat";
 
 const Task = ({ data, toggleCompleted, deleteTodo }) => {
-  const [isControlsOpen, toggleControlsOpen] = useState(false);
-  const [isPanelOpen, togglePanelOpen] = useState(false);
-  
+  const [isControlsOpen, setControlsOpen] = useState(false);
+  const [isPanelOpen, setPanelOpen] = useState(false);
+
   const { title, completed, _id, response } = data;
+
+  const handleToggleControls = () => {
+    setControlsOpen((prevState) => !prevState);
+  };
+
+  const handleTogglePanel = () => {
+    setPanelOpen((prevState) => !prevState);
+  };
 
   return (
     <>
@@ -30,13 +38,15 @@ const Task = ({ data, toggleCompleted, deleteTodo }) => {
         <div className="task-button-container">
           <button
             className="task-controls-button"
-            onClick={() => toggleControlsOpen((prevState) => !prevState)}
+            onClick={handleToggleControls}
           >
             <FontAwesomeIcon icon={faEllipsis} />
           </button>
           <button
-            className={`task-toggle-button ${isPanelOpen && "rotate-90-right"}`}
-            onClick={() => togglePanelOpen((prevState) => !prevState)}
+            className={`task-toggle-button ${
+              isPanelOpen ? "rotate-90-right" : ""
+            }`}
+            onClick={handleTogglePanel}
           >
             <FontAwesomeIcon icon={faChevronRight} />
           </button>
@@ -50,7 +60,7 @@ const Task = ({ data, toggleCompleted, deleteTodo }) => {
           )}
         </div>
       </div>
-      <div className={isPanelOpen ? "task-info-pane" : "hidden"}>
+      <div className={`task-panel ${isPanelOpen ? "open" : "closed"}`}>
         <Chat title={title} todoId={_id} chatResponse={response} />
       </div>
     </>
