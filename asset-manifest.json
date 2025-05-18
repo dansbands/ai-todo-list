@@ -1,16 +1,18 @@
 {
   "files": {
-    "main.css": "/ai-todo-list/static/css/main.42b177ed.css",
-    "main.js": "/ai-todo-list/static/js/main.505aad52.js",
+    "main.css": "/ai-todo-list/static/css/main.31ba573c.css",
+    "main.js": "/ai-todo-list/static/js/main.9389ef0b.js",
     "static/js/453.10a9cd9b.chunk.js": "/ai-todo-list/static/js/453.10a9cd9b.chunk.js",
     "static/media/loading.gif": "/ai-todo-list/static/media/loading.5256e098a03c547a003e.gif",
+    "static/media/logo-dark.jpeg": "/ai-todo-list/static/media/logo-dark.e96c1d93fbea7742018c.jpeg",
+    "static/media/logo-light.jpeg": "/ai-todo-list/static/media/logo-light.9e006c8c22d2e7cc6a66.jpeg",
     "index.html": "/ai-todo-list/index.html",
-    "main.42b177ed.css.map": "/ai-todo-list/static/css/main.42b177ed.css.map",
-    "main.505aad52.js.map": "/ai-todo-list/static/js/main.505aad52.js.map",
+    "main.31ba573c.css.map": "/ai-todo-list/static/css/main.31ba573c.css.map",
+    "main.9389ef0b.js.map": "/ai-todo-list/static/js/main.9389ef0b.js.map",
     "453.10a9cd9b.chunk.js.map": "/ai-todo-list/static/js/453.10a9cd9b.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.42b177ed.css",
-    "static/js/main.505aad52.js"
+    "static/css/main.31ba573c.css",
+    "static/js/main.9389ef0b.js"
   ]
 }
