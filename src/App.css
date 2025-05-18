@@ -93,7 +93,6 @@ button {
     align-items: center;
 
     @media (max-width: 768px) {
-      margin-left: 25%;
       flex-basis: 50%;
     }
 
