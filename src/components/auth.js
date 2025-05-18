@@ -3,7 +3,7 @@ import React, { useState } from "react";
 export const AuthContext = React.createContext(null);
 
 const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(localStorage.getItem("user"));
+  const [user, setUser] = useState(JSON.parse(localStorage.getItem("user")));
 
   const signIn = (newUser, callback) => {
     setUser(newUser);
