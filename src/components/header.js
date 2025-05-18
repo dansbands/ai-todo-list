@@ -2,8 +2,10 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faRightToBracket, faUser } from "@fortawesome/free-solid-svg-icons";
 import { Link, Navigate, redirect, useNavigate } from "react-router-dom";
 import { useAuth } from "./auth";
+import LogoLight from "../img/logo-light.jpeg";
+import LogoDark from "../img/logo-dark.jpeg";
 
-const Header = () => {
+const Header = ({isLight}) => {
   const auth = useAuth();
   const navigate = useNavigate();
 
@@ -11,8 +13,7 @@ const Header = () => {
     <header className="App-header">
       <div className="App-header-main">
         <div className="App-title-container">
-          <div className="App-title">A.I. To-Do List</div>
-          <div className="App-subtitle">powered by ChatGPT</div>
+          <img src={isLight ? LogoLight : LogoDark} alt="Logo" height={100} />
         </div>
       </div>
       <div className="App-header-right">

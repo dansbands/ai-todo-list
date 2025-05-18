@@ -87,14 +87,19 @@ button {
   background: var(--background);
 
   .App-header-main {
-    margin-left: 25%;
-    flex-basis: 50%;
+    flex-basis: 25%;
     display: flex;
     flex-direction: column;
     align-items: center;
 
+    @media (max-width: 768px) {
+      margin-left: 25%;
+      flex-basis: 50%;
+    }
+
     .App-title-container {
       display: flex;
+      justify-content: space-between;
       flex-direction: column;
       width: max-content;
 
@@ -188,7 +193,7 @@ button {
   }
 
   & div {
-    margin: 20px;;
+    margin: 20px;
   }
 }
 
@@ -359,7 +364,7 @@ button {
   justify-content: space-between;
   align-items: center;
   border-bottom: 1px solid #ddd;
-  color:  var(--primary-text);
+  color: var(--primary-text);
   background: var(--background);
   margin-bottom: 1px;
   text-align: left;
@@ -510,7 +515,7 @@ button {
 .task-panel.open {
   padding: 5px;
   margin: 2px;
-  max-height: 600px; /* Adjust based on the content height */
+  max-height: 700px; /* Adjust based on the content height */
 }
 
 .task-panel.closed {

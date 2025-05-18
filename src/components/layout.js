@@ -33,7 +33,7 @@ const Layout = ({ children }) => {
 
   return (
     <div className="App">
-      <Header />
+      <Header isLight={isLight} />
       <div className="App-divider" />
       <div className="App-body">{children}</div>
       <button className="color-mode-switch" onClick={switchColorMode}>
