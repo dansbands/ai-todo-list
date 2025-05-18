@@ -187,7 +187,6 @@ button {
   align-items: center;
 
   & img {
-    margin-top: 30vh;
     width: 100px;
     height: 75px;
   }
@@ -472,6 +471,7 @@ button {
 .task-controls-button,
 .task-toggle-button,
 .task-delete-button {
+  color: var(--secondary);
   background: none;
   border: none;
   cursor: pointer;
