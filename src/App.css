@@ -460,6 +460,10 @@ button {
   }
 }
 
+.task-container {
+  transition: all 0.3s ease-out;
+}
+
 .task-button-container {
   display: flex;
   align-items: center;
@@ -479,6 +483,9 @@ button {
 }
 
 .task-delete-button {
+  position: absolute;
+  right: -100px;
+  top: 0;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -488,7 +495,7 @@ button {
   color: var(--background);
   font-size: 20px;
   height: 60px;
-  width: 60px;
+  width: 100px;
 }
 
 .task-info-pane {
