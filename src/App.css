@@ -514,7 +514,7 @@ button {
 }
 
 .task-controls-button {
-  @media screen and (max-width: 475px) {
+  @media screen and (max-width: 768px) {
     display: none;
   }
 }
