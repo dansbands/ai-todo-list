@@ -67,9 +67,10 @@ body {
   color: var(--foreground);
   padding-bottom: 50px;
 
-  @media screen and (max-width: 425px) {
+  @media screen and (max-width: 430px) {
     position: fixed;
     width: 100%;
+    height: 100%
   }
 }
 
@@ -80,7 +81,7 @@ button {
 .App {
   text-align: center;
 
-  @media screen and (max-width: 425px) {
+  @media screen and (max-width: 430px) {
     overflow: scroll;
   }
 }
@@ -129,7 +130,7 @@ button {
       & img {
         height: 100px;
 
-        @media (max-width: 425px) {
+        @media (max-width: 430px) {
           height: 75px;
         }
       }
@@ -513,13 +514,13 @@ button {
 }
 
 .task-controls-button {
-  @media screen and (max-width: 425px) {
+  @media screen and (max-width: 430px) {
     display: none;
   }
 }
 
 .task-toggle-button {
-  @media screen and (max-width: 425px) {
+  @media screen and (max-width: 430px) {
     width: 200px;
     position: absolute;
     right: 0;
