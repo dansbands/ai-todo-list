@@ -204,6 +204,20 @@ button {
   text-overflow: ellipsis;
 }
 
+.task-title input {
+  font-size: 16px;
+  padding: 5px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.task-title input:focus {
+  outline: none;
+  border-color: var(--primary);
+}
+
 .task-list {
   padding: 20px;
   background: var(--secondary-gradient-right);

@@ -7,10 +7,12 @@ import {
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Chat from "./chat";
 
-const Task = ({ data, toggleCompleted, deleteTodo }) => {
+const Task = ({ data, toggleCompleted, deleteTodo, updateTaskTitle }) => {
   const [isPanelOpen, setPanelOpen] = useState(false);
   const [swipeOffset, setSwipeOffset] = useState(0);
   const [startX, setStartX] = useState(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedTitle, setEditedTitle] = useState(data.title);
 
   const { title, completed, _id, response } = data;
 
@@ -53,6 +55,31 @@ const Task = ({ data, toggleCompleted, deleteTodo }) => {
     setStartX(null);
   };
 
+  // Toggle editing mode
+  const handleTitleClick = () => {
+    setIsEditing(true);
+  };
+
+  // Save the edited title
+  const handleTitleSave = () => {
+    setIsEditing(false);
+    if (editedTitle.trim() !== title) {
+      updateTaskTitle(_id, editedTitle.trim());
+    }
+  };
+
+  // Handle input changes
+  const handleInputChange = (e) => {
+    setEditedTitle(e.target.value);
+  };
+
+  // Handle "Enter" key press
+  const handleKeyPress = (e) => {
+    if (e.key === "Enter") {
+      handleTitleSave();
+    }
+  };
+
   return (
     <div
       className="task-container"
@@ -71,7 +98,20 @@ const Task = ({ data, toggleCompleted, deleteTodo }) => {
             />
             <div className="task-checkmark"></div>
           </label>
-          <div className="task-title">{title}</div>
+          <div className="task-title">
+            {isEditing ? (
+              <input
+                type="text"
+                value={editedTitle}
+                onChange={handleInputChange}
+                onBlur={handleTitleSave}
+                onKeyPress={handleKeyPress}
+                autoFocus
+              />
+            ) : (
+              <span onClick={handleTitleClick}>{title}</span>
+            )}
+          </div>
         </div>
         <div className="task-button-container">
           <button
