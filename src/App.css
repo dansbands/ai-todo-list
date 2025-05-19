@@ -241,7 +241,7 @@ button {
   background: var(--secondary-gradient-right);
   background-clip: content-box;
 
-  @media (max-width: 768px) {
+  @media (max-width: 475px) {
     padding: 20px 0;
   }
 }
@@ -516,6 +516,7 @@ button {
 .task-controls-button {
   @media screen and (max-width: 768px) {
     display: none;
+    -webkit-display: none;
   }
 }
 
