@@ -66,6 +66,11 @@ body {
   background-color: var(--background);
   color: var(--foreground);
   padding-bottom: 50px;
+
+  @media screen and (max-width: 425px) {
+    position: fixed;
+    width: 100%;
+  }
 }
 
 button {
@@ -74,6 +79,10 @@ button {
 
 .App {
   text-align: center;
+
+  @media screen and (max-width: 425px) {
+    overflow: scroll;
+  }
 }
 
 .App-header {
