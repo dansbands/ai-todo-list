@@ -116,6 +116,14 @@ button {
         text-align: right;
         color: var(--secondary);
       }
+
+      & img {
+        height: 100px;
+
+        @media (max-width: 425px) {
+          height: 75px;
+        }
+      }
     }
   }
 
@@ -493,6 +501,21 @@ button {
   border: none;
   cursor: pointer;
   font-size: 16px;
+}
+
+.task-controls-button {
+  @media screen and (max-width: 425px) {
+    display: none;
+  }
+}
+
+.task-toggle-button {
+  @media screen and (max-width: 425px) {
+    width: 200px;
+    position: absolute;
+    right: 0;
+    justify-content: flex-end;
+  }
 }
 
 .task-delete-button {

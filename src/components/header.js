@@ -13,7 +13,7 @@ const Header = ({isLight}) => {
     <header className="App-header">
       <div className="App-header-main">
         <div className="App-title-container">
-          <img src={isLight ? LogoLight : LogoDark} alt="Logo" height={100} />
+          <img src={isLight ? LogoLight : LogoDark} alt="Logo" />
         </div>
       </div>
       <div className="App-header-right">
