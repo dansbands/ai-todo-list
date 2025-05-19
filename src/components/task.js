@@ -16,7 +16,6 @@ const Task = ({ data, toggleCompleted, deleteTodo, updateTaskTitle }) => {
 
   const { title, completed, _id, response } = data;
 
-  // Handle panel toggle
   const handleTogglePanel = () => {
     setPanelOpen((prevState) => !prevState);
   };
@@ -25,42 +24,36 @@ const Task = ({ data, toggleCompleted, deleteTodo, updateTaskTitle }) => {
     setSwipeOffset(swipeOffset === 0 ? -100 : 0);
   };
 
-  // Handle touch start
   const handleTouchStart = (e) => {
     setStartX(e.touches[0].clientX);
   };
 
-  // Handle touch move
   const handleTouchMove = (e) => {
     if (startX !== null) {
       const currentX = e.touches[0].clientX;
       const offset = currentX - startX;
 
-      // Allow swiping left (negative offset) or right (positive offset)
       if (offset < 0) {
-        setSwipeOffset(Math.max(offset, -100)); // Limit swipe left to -100px
+        setSwipeOffset(Math.max(offset, -100)); 
       } else {
-        setSwipeOffset(Math.min(offset, 0)); // Limit swipe right to 0px
+        setSwipeOffset(Math.min(offset, 0));
       }
     }
   };
 
-  // Handle touch end
   const handleTouchEnd = () => {
     if (swipeOffset < -50) {
-      setSwipeOffset(-100); // Fully reveal delete button
+      setSwipeOffset(-100); 
     } else {
-      setSwipeOffset(0); // Reset position (hide delete button)
+      setSwipeOffset(0);
     }
     setStartX(null);
   };
 
-  // Toggle editing mode
   const handleTitleClick = () => {
     setIsEditing(true);
   };
 
-  // Save the edited title
   const handleTitleSave = () => {
     setIsEditing(false);
     if (editedTitle.trim() !== title) {
@@ -68,12 +61,10 @@ const Task = ({ data, toggleCompleted, deleteTodo, updateTaskTitle }) => {
     }
   };
 
-  // Handle input changes
   const handleInputChange = (e) => {
     setEditedTitle(e.target.value);
   };
 
-  // Handle "Enter" key press
   const handleKeyPress = (e) => {
     if (e.key === "Enter") {
       handleTitleSave();
@@ -105,7 +96,7 @@ const Task = ({ data, toggleCompleted, deleteTodo, updateTaskTitle }) => {
                 value={editedTitle}
                 onChange={handleInputChange}
                 onBlur={handleTitleSave}
-                onKeyPress={handleKeyPress}
+                onKeyDown={handleKeyPress}
                 autoFocus
               />
             ) : (
