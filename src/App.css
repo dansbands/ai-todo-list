@@ -68,7 +68,7 @@ body {
   padding-bottom: 50px;
 
   @media screen and (max-width: 475px) {
-    position: fixed;
+    position: absolute;
     width: 100%;
     height: 100%;
   }
@@ -250,6 +250,11 @@ button {
   justify-content: space-around;
   margin-top: 15px;
   width: 100%;
+
+  @media screen and (max-width: 768px) {
+    width: 95%;
+    padding: 0 2.5%;
+  }
 }
 
 .form-input {
@@ -281,6 +286,22 @@ button {
   }
 }
 
+.sign-up-intro {
+  background: url("img/chaos-landscape.png") no-repeat;
+  width: 100%;
+  height: 100vh;
+  background-position: center center;
+  background-size: cover;
+
+  @media (max-width: 768px) {
+    background: url("img/chaos-portrait.png") no-repeat;
+    width: 100%;
+    height: 100vh;
+    background-position: center center;
+    background-size: cover;
+  }
+}
+
 .sign-up-left {
   width: 40%;
   height: calc(100vh - 150px);
@@ -301,6 +322,9 @@ button {
 }
 
 .sign-up-right {
+  display: flex;
+  justify-content: center;
+  align-items: center;
   width: 70%;
   height: 100vh;
 
@@ -331,6 +355,43 @@ button {
   }
 }
 
+.help-container {
+  font-size: 24px;
+  width: 80%;
+  color: var(--secondary);
+  border-radius: 10px;
+  padding: 20px;
+  line-height: 2;
+
+  @media screen and (max-width: 768px) {
+    background: var(--background);
+    bottom: 30%;
+    width: unset;
+    padding: 30px 40px;
+    margin: 0 auto;
+    position: fixed;
+  }
+
+  & button {
+    border: 1px solid;
+    border-color: var(--secondary);
+    border-radius: 25px;
+    color: var(--secondary);
+    background: transparent;
+    padding: 10px;
+    height: 45px;
+    width: 50%;
+    min-width: 45px;
+    transition: background-color 0.3s;
+    align-self: flex-end;
+    margin-top: 10px;
+
+    @media screen and (max-width: 768px) {
+      margin-top: 20px;
+    }
+  }
+}
+
 .sign-up-form {
   right: 20px;
   background-color: var(--background);
@@ -345,7 +406,7 @@ button {
   }
 
   @media (max-width: 768px) {
-    animation: slideInFromRight 3s ease-out;
+    animation: slideInFromRight 2.5s ease-out;
     position: absolute;
     top: 250px;
     left: 0;
@@ -383,7 +444,7 @@ button {
     @media (max-width: 1024px) {
       width: 50%;
     }
-    
+
     @media (max-width: 768px) {
       margin: 20px 0;
       width: 100%;

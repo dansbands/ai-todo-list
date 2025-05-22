@@ -3,10 +3,11 @@ import { Link, useNavigate } from "react-router-dom";
 import Input from "./input";
 import { getApp, postExistingUser } from "../util/fetch";
 import { useAuth } from "../components/auth";
-import LoadingWrapper from "../components/loading-wrapper";
 
+// @TODO: revisit and fix after testing behavior in production
 const SignIn = () => {
   const [pageLoadingState, setPageLoadingState] = useState(null);
+  const [showSignUp, setShowSignUp] = useState(false);
   const [inputValue, setInputValue] = useState({
     email: "guest@guest.com",
     password: "abc123",
@@ -48,10 +49,10 @@ const SignIn = () => {
   };
 
   return (
-    <LoadingWrapper pageLoadingState={pageLoadingState}>
-      <div className="sign-up-container">
-        <div className="sign-up-left"></div>
-        <div className="sign-up-right">
+    <div className="sign-up-container">
+      <div className={showSignUp ? "sign-up-left" : "sign-up-intro"}></div>
+      <div className="sign-up-right">
+        {showSignUp ? (
           <div className="sign-up-form">
             <div className="form-title">Sign In</div>
             <Input
@@ -80,9 +81,17 @@ const SignIn = () => {
               <Link to="/sign-up">Sign Up instead</Link>
             </div>
           </div>
-        </div>
+        ) : (
+          <div className="help-container">
+            <div>Does life feel like this lately?</div>
+            <div>You need help!</div>
+            <button className="get-started" onClick={() => setShowSignUp(true)}>
+              Get Started!
+            </button>
+          </div>
+        )}
       </div>
-    </LoadingWrapper>
+    </div>
   );
 };
 
