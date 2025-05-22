@@ -395,17 +395,14 @@ button {
 .sign-up-form {
   right: 20px;
   background-color: var(--background);
-  padding: 50px;
   display: flex;
   flex-direction: column;
+  padding: 50px;
   margin: 20px auto;
   width: 80%;
-
-  @media (max-width: 1024px) {
-    width: unset;
-  }
-
+  
   @media (max-width: 768px) {
+    width: unset;
     animation: slideInFromRight 2.5s ease-out;
     position: absolute;
     top: 250px;
