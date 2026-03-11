@@ -68,18 +68,32 @@ const Chat = ({ title, todoId, chatResponse }) => {
           <div>{loading ? "loading..." : "AI Assistant"}</div>
         </button>
       </div>
-      <div className="chat-response">
-        <div>{response.message}</div>
-        {renderLinks()}
-        <a
-          href={googleLink}
-          className="chat-search-link"
-          target="_blank"
-          rel="noreferrer"
-        >
-          continue search on Google
-        </a>
-      </div>
+      {response.message && (
+        <div className="chat-response">
+          <>
+            <div className="chat-section">
+              <h3>🧠 Plan</h3>
+              <div>{response.message}</div>
+            </div>
+            <div className="chat-section">
+              <h3>🔗 Resources</h3>
+              {renderLinks()}
+            </div>
+
+            <div className="chat-section">
+              <h3>🔍 Search on Google</h3>
+              <a
+                href={googleLink}
+                className="chat-search-link"
+                target="_blank"
+                rel="noreferrer"
+              >
+                continue search on Google
+              </a>
+            </div>
+          </>
+        </div>
+      )}
     </div>
   );
 };

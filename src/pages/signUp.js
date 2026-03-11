@@ -58,49 +58,54 @@ const SignUp = () => {
 
   return (
     <LoadingWrapper pageLoadingState={pageLoadingState}>
-      <div className="sign-up-form">
-        <div className="form-title">Sign Up</div>
-        <Input
-          name="firstName"
-          title="First Name"
-          inputValue={inputValue?.firstName}
-          inputError={inputError?.firstName}
-          setInputValue={setInputValue}
-          setInputError={setInputError}
-          handleSubmit={handleSubmit}
-        />
-        <Input
-          name="lastName"
-          title="Last Name"
-          inputValue={inputValue?.lastName}
-          inputError={inputError?.lastName}
-          setInputValue={setInputValue}
-          setInputError={setInputError}
-          handleSubmit={handleSubmit}
-        />
-        <Input
-          name="email"
-          title="Email"
-          inputValue={inputValue?.email}
-          inputError={inputError?.email}
-          setInputValue={setInputValue}
-          setInputError={setInputError}
-          handleSubmit={handleSubmit}
-        />
-        <Input
-          name="password"
-          title="Password"
-          inputValue={inputValue?.password}
-          inputError={inputError?.password}
-          setInputValue={setInputValue}
-          setInputError={setInputError}
-          handleSubmit={handleSubmit}
-        />
-        <button type="submit" onClick={handleSubmit}>
-          Sign Up
-        </button>
-        <div className="sign-up-links">
-          <Link to="/sign-in">Sign In instead</Link>
+      <div className="sign-up-container">
+        <div className="sign-up-left"></div>
+        <div className="sign-up-right">
+          <div className="sign-up-form">
+            <div className="form-title">Sign Up</div>
+            <Input
+              name="firstName"
+              title="First Name"
+              inputValue={inputValue?.firstName}
+              inputError={inputError?.firstName}
+              setInputValue={setInputValue}
+              setInputError={setInputError}
+              handleSubmit={handleSubmit}
+            />
+            <Input
+              name="lastName"
+              title="Last Name"
+              inputValue={inputValue?.lastName}
+              inputError={inputError?.lastName}
+              setInputValue={setInputValue}
+              setInputError={setInputError}
+              handleSubmit={handleSubmit}
+            />
+            <Input
+              name="email"
+              title="Email"
+              inputValue={inputValue?.email}
+              inputError={inputError?.email}
+              setInputValue={setInputValue}
+              setInputError={setInputError}
+              handleSubmit={handleSubmit}
+            />
+            <Input
+              name="password"
+              title="Password"
+              inputValue={inputValue?.password}
+              inputError={inputError?.password}
+              setInputValue={setInputValue}
+              setInputError={setInputError}
+              handleSubmit={handleSubmit}
+            />
+            <button type="submit" onClick={handleSubmit}>
+              Sign Up
+            </button>
+            <div className="sign-up-links">
+              <Link to="/sign-in">Sign In instead</Link>
+            </div>
+          </div>
         </div>
       </div>
     </LoadingWrapper>

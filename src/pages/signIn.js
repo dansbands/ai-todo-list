@@ -3,11 +3,15 @@ import { Link, useNavigate } from "react-router-dom";
 import Input from "./input";
 import { getApp, postExistingUser } from "../util/fetch";
 import { useAuth } from "../components/auth";
-import LoadingWrapper from "../components/loading-wrapper";
 
+// @TODO: revisit and fix after testing behavior in production
 const SignIn = () => {
   const [pageLoadingState, setPageLoadingState] = useState(null);
-  const [inputValue, setInputValue] = useState({ email: "guest@guest.com", password: "abc123" });
+  const [showSignUp, setShowSignUp] = useState(false);
+  const [inputValue, setInputValue] = useState({
+    email: "guest@guest.com",
+    password: "abc123",
+  });
   const [authError, setAuthError] = useState("");
   const [inputError, setInputError] = useState({
     email: false,
@@ -45,36 +49,49 @@ const SignIn = () => {
   };
 
   return (
-    <LoadingWrapper pageLoadingState={pageLoadingState}>
-      <div className="sign-up-form">
-        <div className="form-title">Sign In</div>
-        <Input
-          name="email"
-          title="Email"
-          inputValue={inputValue?.email}
-          inputError={inputError?.email}
-          setInputValue={setInputValue}
-          setInputError={setInputError}
-          handleSubmit={handleSubmit}
-        />
-        <Input
-          name="password"
-          title="Password"
-          inputValue={inputValue?.password}
-          inputError={inputError?.password}
-          setInputValue={setInputValue}
-          setInputError={setInputError}
-          handleSubmit={handleSubmit}
-        />
-        {authError && <div className="auth-error">{authError}</div>}
-        <button type="submit" onClick={handleSubmit}>
-          Sign In
-        </button>
-        <div className="sign-up-links">
-          <Link to="/sign-up">Sign Up instead</Link>
-        </div>
+    <div className="sign-up-container">
+      <div className={showSignUp ? "sign-up-left" : "sign-up-intro"}></div>
+      <div className="sign-up-right">
+        {showSignUp ? (
+          <div className="sign-up-form">
+            <div className="form-title">Sign In</div>
+            <Input
+              name="email"
+              title="Email"
+              inputValue={inputValue?.email}
+              inputError={inputError?.email}
+              setInputValue={setInputValue}
+              setInputError={setInputError}
+              handleSubmit={handleSubmit}
+            />
+            <Input
+              name="password"
+              title="Password"
+              inputValue={inputValue?.password}
+              inputError={inputError?.password}
+              setInputValue={setInputValue}
+              setInputError={setInputError}
+              handleSubmit={handleSubmit}
+            />
+            {authError && <div className="auth-error">{authError}</div>}
+            <button type="submit" onClick={handleSubmit}>
+              Sign In
+            </button>
+            <div className="sign-up-links">
+              <Link to="/sign-up">Sign Up instead</Link>
+            </div>
+          </div>
+        ) : (
+          <div className="help-container">
+            <div>Does life feel like this lately?</div>
+            <div>You need help!</div>
+            <button className="get-started" onClick={() => setShowSignUp(true)}>
+              Get Started!
+            </button>
+          </div>
+        )}
       </div>
-    </LoadingWrapper>
+    </div>
   );
 };
 

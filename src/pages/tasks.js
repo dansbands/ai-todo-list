@@ -7,6 +7,7 @@ import {
   deleteTodo,
   getUserTodos,
   postTodo,
+  updateTodo,
 } from "../util/fetch";
 import loadingGif from "../img/loading.gif";
 import Input from "./input";
@@ -61,6 +62,27 @@ const Tasks = () => {
     return -1;
   };
 
+  const updateTaskTitle = (taskId, newTitle) => {
+    let taskToUpdate;
+    const updatedTasks = allTasks.map((task) => {
+      if (task._id === taskId) {
+        taskToUpdate = task;
+        taskToUpdate.title = newTitle;
+        updateTodo(taskToUpdate)
+          .then((res) => {
+            console.log("Task title updated successfully", res);
+          })
+          .catch((error) => {
+            console.error("Error updating task title:", error);
+          });
+        return { ...task, title: newTitle };
+      } else {
+        return task;
+      }
+    });
+    setAllTasks(updatedTasks);
+  };
+
   return (
     <>
       {pageLoadingState && pageLoadingState === "loading" ? (
@@ -98,6 +120,7 @@ const Tasks = () => {
                     data={taskData}
                     toggleCompleted={toggleCompleted}
                     deleteTodo={() => deleteTodo(_id, allTasks, setAllTasks)}
+                    updateTaskTitle={updateTaskTitle}
                   />
                 );
               })}
