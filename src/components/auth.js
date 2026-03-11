@@ -1,21 +1,7 @@
 import React, { useState } from "react";
+import { getStoredValue } from "../util/fetch";
 
 export const AuthContext = React.createContext(null);
-
-const getStoredValue = (key) => {
-  const storedValue = localStorage.getItem(key);
-
-  if (!storedValue) {
-    return null;
-  }
-
-  try {
-    return JSON.parse(storedValue);
-  } catch (error) {
-    return storedValue;
-  }
-};
-
 const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(() => getStoredValue("user"));
 
