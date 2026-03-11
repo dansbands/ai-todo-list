@@ -1,14 +1,14 @@
 import React, { useState } from "react";
+import { getStoredValue } from "../util/fetch";
 
 export const AuthContext = React.createContext(null);
-
 const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(JSON.parse(localStorage.getItem("user")));
+  const [user, setUser] = useState(() => getStoredValue("user"));
 
   const signIn = (newUser, callback) => {
     setUser(newUser);
     localStorage.setItem("user", JSON.stringify(newUser));
-    localStorage.setItem("token", JSON.stringify(newUser.token));
+    localStorage.setItem("token", newUser.token);
     callback();
   };
 

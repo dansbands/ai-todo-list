@@ -21,18 +21,21 @@ const Tasks = () => {
   const auth = useAuth();
 
   useEffect(() => {
+    if (!auth.user?._id) {
+      return;
+    }
+
     setPageLoadingState("loading");
-    getUserTodos(auth.user._id).then((todos) => {
-      if (todos.length !== allTasks.length) setAllTasks(todos);
+    getUserTodos().then((todos) => {
+      setAllTasks(todos);
       setPageLoadingState("complete");
     });
-  }, [allTasks]);
+  }, [auth.user?._id]);
 
   const handleSubmit = () => {
     const newTask = {
       title: inputValue.taskName,
       completed: false,
-      userId: auth.user._id,
     };
 
     if (inputValue) {
