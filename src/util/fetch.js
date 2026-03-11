@@ -42,6 +42,38 @@ const appUrl = `${serverUrl}/`;
 const todosUrl = `${serverUrl}/api/todos`;
 const userTodosUrl = `${serverUrl}/api/user/todos`;
 
+const getTodosFromResponse = (data) => {
+  if (Array.isArray(data)) {
+    return data;
+  }
+
+  if (Array.isArray(data?.todos)) {
+    return data.todos;
+  }
+
+  throw new Error("Invalid todos response");
+};
+
+const getTodoFromResponse = (data) => {
+  if (data?.todo && data.todo?._id) {
+    return data.todo;
+  }
+
+  if (data?._id) {
+    return data;
+  }
+
+  throw new Error("Invalid todo response");
+};
+
+const getDeleteResponse = (data) => {
+  if (typeof data?.deletedId === "string" && data.deletedId) {
+    return data;
+  }
+
+  throw new Error("Invalid delete response");
+};
+
 export const getApp = async () => {
   const message = await axios.get(appUrl, {
     headers: baseHeaders,
@@ -51,62 +83,59 @@ export const getApp = async () => {
 
 export const getUserTodos = async () => {
   const message = await axios.post(userTodosUrl, {}, getConfig(true));
-  return message.data;
+  return getTodosFromResponse(message.data);
 };
 
 export const getTodos = async () => {
   const message = await axios.get(todosUrl, getConfig(true));
-  return message.data;
+  return getTodosFromResponse(message.data);
 };
 
-export const postTodo = async (todo, tasks, setTasks) => {
-  await axios
-    .post(todosUrl, todo, getConfig(true))
-    .then(() => getTodos())
-    .then((todos) => {
-      if (todos.length !== tasks.length) setTasks(todos);
-    });
+export const postTodo = async (todo) => {
+  const message = await axios.post(
+    todosUrl,
+    {
+      title: todo.title,
+      completed: todo.completed,
+    },
+    getConfig(true)
+  );
+
+  return getTodoFromResponse(message.data);
 };
 
 export const updateTodo = async (todo) => {
   const editUrl = `${todosUrl}/${todo._id}/edit`;
-  await axios.put(
+  const message = await axios.put(
     editUrl,
     {
-      ...todo,
+      title: todo.title,
+      completed: todo.completed,
     },
     getConfig(true)
   );
+
+  return getTodoFromResponse(message.data);
 };
 
-export const completeTodo = async (todo, tasks, setTasks) => {
+export const completeTodo = async (todo) => {
   const completeUrl = `${todosUrl}/${todo._id}/complete`;
-  await axios
-    .put(
-      completeUrl,
-      {
-        ...todo,
-      },
-      getConfig(true)
-    )
-    .then(() => getTodos())
-    .then((todos) => {
-      setTasks(todos);
-    });
+  const message = await axios.put(
+    completeUrl,
+    {
+      completed: todo.completed,
+    },
+    getConfig(true)
+  );
+
+  return getTodoFromResponse(message.data);
 };
 
-export const deleteTodo = async (id, tasks, setTasks) => {
+export const deleteTodo = async (id) => {
   const url = `${serverUrl}/api/todos/${id}`;
 
-  await axios
-    .delete(url, {
-      ...getConfig(true),
-      data: { id },
-    })
-    .then(() => getTodos())
-    .then((todos) => {
-      if (todos.length !== tasks.length) setTasks(todos);
-    });
+  const message = await axios.delete(url, getConfig(true));
+  return getDeleteResponse(message.data);
 };
 
 export const postNewUser = async (formValues) => {

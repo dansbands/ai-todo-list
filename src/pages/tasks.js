@@ -21,39 +21,86 @@ const Tasks = () => {
   const auth = useAuth();
 
   useEffect(() => {
+    let isActive = true;
+
     if (!auth.user?._id) {
-      return;
+      setAllTasks([]);
+      setPageLoadingState("complete");
+      return () => {
+        isActive = false;
+      };
     }
 
-    setPageLoadingState("loading");
-    getUserTodos().then((todos) => {
-      setAllTasks(todos);
-      setPageLoadingState("complete");
-    });
+    const loadTodos = async () => {
+      setPageLoadingState("loading");
+
+      try {
+        const todos = await getUserTodos();
+
+        if (!isActive) {
+          return;
+        }
+
+        setAllTasks(todos);
+        setPageLoadingState("complete");
+      } catch (error) {
+        console.error("Error loading todos:", error);
+
+        if (!isActive) {
+          return;
+        }
+
+        setAllTasks([]);
+        setPageLoadingState("error");
+      }
+    };
+
+    loadTodos();
+
+    return () => {
+      isActive = false;
+    };
   }, [auth.user?._id]);
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
+    const trimmedTaskName = inputValue.taskName?.trim();
     const newTask = {
-      title: inputValue.taskName,
+      title: trimmedTaskName,
       completed: false,
     };
 
-    if (inputValue) {
-      postTodo(newTask, allTasks, setAllTasks);
-      setAllTasks((prevState) => [newTask, ...prevState]);
-      setInputValue("");
+    if (trimmedTaskName) {
+      try {
+        const createdTodo = await postTodo(newTask);
+        setAllTasks((prevState) => [createdTodo, ...prevState]);
+        setInputValue({ taskName: "" });
+        setInputError({ taskName: false });
+      } catch (error) {
+        console.error("Error creating todo:", error);
+      }
     } else {
-      setInputError(true);
+      setInputError({ taskName: true });
     }
   };
 
-  const toggleCompleted = (id) => {
-    const newTasks = [...allTasks];
-    const foundItm = newTasks.find((task) => task._id === id);
-    foundItm.completed = !foundItm.completed;
-    completeTodo(foundItm, allTasks, setAllTasks);
+  const toggleCompleted = async (id) => {
+    const foundItm = allTasks.find((task) => task._id === id);
+    if (!foundItm) {
+      return;
+    }
 
-    setAllTasks(newTasks);
+    try {
+      const updatedTodo = await completeTodo({
+        _id: foundItm._id,
+        completed: !foundItm.completed,
+      });
+
+      setAllTasks((prevState) =>
+        prevState.map((task) => (task._id === id ? updatedTodo : task))
+      );
+    } catch (error) {
+      console.error("Error updating todo completion:", error);
+    }
   };
 
   const sortByCompleted = (a, b) => {
@@ -62,25 +109,36 @@ const Tasks = () => {
     return -1;
   };
 
-  const updateTaskTitle = (taskId, newTitle) => {
-    let taskToUpdate;
-    const updatedTasks = allTasks.map((task) => {
-      if (task._id === taskId) {
-        taskToUpdate = task;
-        taskToUpdate.title = newTitle;
-        updateTodo(taskToUpdate)
-          .then((res) => {
-            console.log("Task title updated successfully", res);
-          })
-          .catch((error) => {
-            console.error("Error updating task title:", error);
-          });
-        return { ...task, title: newTitle };
-      } else {
-        return task;
-      }
-    });
-    setAllTasks(updatedTasks);
+  const handleDelete = async (taskId) => {
+    try {
+      const result = await deleteTodo(taskId);
+      setAllTasks((prevState) =>
+        prevState.filter((task) => task._id !== result.deletedId)
+      );
+    } catch (error) {
+      console.error("Error deleting todo:", error);
+    }
+  };
+
+  const updateTaskTitle = async (taskId, newTitle) => {
+    const taskToUpdate = allTasks.find((task) => task._id === taskId);
+    if (!taskToUpdate) {
+      return;
+    }
+
+    try {
+      const updatedTodo = await updateTodo({
+        _id: taskToUpdate._id,
+        title: newTitle,
+        completed: taskToUpdate.completed,
+      });
+
+      setAllTasks((prevState) =>
+        prevState.map((task) => (task._id === taskId ? updatedTodo : task))
+      );
+    } catch (error) {
+      console.error("Error updating todo title:", error);
+    }
   };
 
   return (
@@ -88,6 +146,10 @@ const Tasks = () => {
       {pageLoadingState && pageLoadingState === "loading" ? (
         <div className="loading-indicator">
           <img src={loadingGif} alt="loader" />
+        </div>
+      ) : pageLoadingState === "error" ? (
+        <div className="loading-indicator">
+          <div>Unable to load tasks.</div>
         </div>
       ) : (
         <>
@@ -110,7 +172,7 @@ const Tasks = () => {
           </div>
 
           <div className="task-list">
-            {allTasks
+            {[...allTasks]
               .sort((a, b) => sortByCompleted(a, b))
               .map((taskData) => {
                 const { _id } = taskData;
@@ -119,7 +181,7 @@ const Tasks = () => {
                     key={_id}
                     data={taskData}
                     toggleCompleted={toggleCompleted}
-                    deleteTodo={() => deleteTodo(_id, allTasks, setAllTasks)}
+                    deleteTodo={() => handleDelete(_id)}
                     updateTaskTitle={updateTaskTitle}
                   />
                 );
