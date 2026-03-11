@@ -38,7 +38,7 @@ const Header = ({ isLight }) => {
           )}
         </div>
       </header>
-      <p style={{ "font-size": "10px" }}>v.1.3</p>
+      <p style={{ fontSize: "10px" }}>v.1.3</p>
     </>
   );
 };

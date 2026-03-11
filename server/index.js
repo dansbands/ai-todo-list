@@ -24,6 +24,55 @@ MongoClient.connect(connectionString).then((client) => {
   const todoCollection = db.collection("todos");
   const usersCollection = db.collection("users");
 
+  const isPlainObject = (value) =>
+    Boolean(value) && typeof value === "object" && !Array.isArray(value);
+
+  const getUnexpectedFields = (body, allowedFields) =>
+    Object.keys(body).filter((field) => !allowedFields.includes(field));
+
+  const validateTodoCreatePayload = (body) => {
+    if (!isPlainObject(body)) {
+      return "Request body must be a JSON object";
+    }
+
+    const unexpectedFields = getUnexpectedFields(body, ["title", "completed"]);
+    if (unexpectedFields.length) {
+      return `Unexpected fields: ${unexpectedFields.join(", ")}`;
+    }
+
+    if (typeof body.title !== "string" || !body.title.trim()) {
+      return "Title is required";
+    }
+
+    if (typeof body.completed !== "boolean") {
+      return "Completed must be a boolean";
+    }
+
+    return null;
+  };
+
+  const validateTodoEditPayload = (body) => {
+    // Reuse the create payload validator to keep allowed fields and rules in one place
+    return validateTodoCreatePayload(body);
+  };
+
+  const validateTodoCompletePayload = (body) => {
+    if (!isPlainObject(body)) {
+      return "Request body must be a JSON object";
+    }
+
+    const unexpectedFields = getUnexpectedFields(body, ["completed"]);
+    if (unexpectedFields.length) {
+      return `Unexpected fields: ${unexpectedFields.join(", ")}`;
+    }
+
+    if (typeof body.completed !== "boolean") {
+      return "Completed must be a boolean";
+    }
+
+    return null;
+  };
+
   const getTodoFilter = (todoId, userId) => ({
     _id: new ObjectId(todoId),
     userId,
@@ -140,73 +189,116 @@ MongoClient.connect(connectionString).then((client) => {
    */
 
   app.post("/api/user/todos", auth, async (req, res) => {
+    if (isPlainObject(req.body) && Object.keys(req.body).length > 0) {
+      return res.status(400).json({ error: "This endpoint does not accept a request body" });
+    }
+
     try {
-      const todos = await todoCollection.find({ userId: req.user._id }).toArray();
-      return res.status(200).send(todos);
+      const todos = await todoCollection
+        .find({ userId: req.user._id })
+        .sort({ _id: -1 })
+        .toArray();
+      return res.status(200).json({ todos });
     } catch (error) {
       console.error(error);
-      return res.status(500).send({ error: "Unable to fetch todos" });
+      return res.status(500).json({ error: "Unable to fetch todos" });
     }
   });
 
   app.get("/api/todos", auth, async (req, res) => {
     try {
-      const todos = await todoCollection.find({ userId: req.user._id }).toArray();
-      return res.status(200).send(todos);
+      const todos = await todoCollection
+        .find({ userId: req.user._id })
+        .sort({ _id: -1 })
+        .toArray();
+      return res.status(200).json({ todos });
     } catch (error) {
       console.error(error);
-      return res.status(500).send({ error: "Unable to fetch todos" });
+      return res.status(500).json({ error: "Unable to fetch todos" });
     }
   });
 
   app.post("/api/todos", auth, async (req, res) => {
+    const validationError = validateTodoCreatePayload(req.body);
+    if (validationError) {
+      return res.status(400).json({ error: validationError });
+    }
+
     try {
       const todo = {
-        ...req.body,
+        title: req.body.title.trim(),
+        completed: req.body.completed,
         userId: req.user._id,
       };
 
       const result = await todoCollection.insertOne(todo);
-
-      return res.status(201).send({
-        ...todo,
+      const createdTodo = await todoCollection.findOne({
         _id: result.insertedId,
+        userId: req.user._id,
       });
+
+      if (!createdTodo) {
+        console.error("Todo created but could not be retrieved", {
+          insertedId: result.insertedId,
+          userId: req.user._id,
+        });
+        return res.status(500).json({ error: "Unable to create todo" });
+      }
+      return res.status(201).json({ todo: createdTodo });
     } catch (error) {
       console.error(error);
-      return res.status(500).send({ error: "Unable to create todo" });
+      return res.status(500).json({ error: "Unable to create todo" });
     }
   });
 
   app.put("/api/todos/:id/edit", auth, async (req, res) => {
     if (!ObjectId.isValid(req.params.id)) {
-      return res.status(400).send({ error: "Invalid todo id" });
+      return res.status(400).json({ error: "Invalid todo id" });
+    }
+
+    const validationError = validateTodoEditPayload(req.body);
+    if (validationError) {
+      return res.status(400).json({ error: validationError });
     }
 
     try {
       const filter = getTodoFilter(req.params.id, req.user._id);
       const result = await todoCollection.updateOne(filter, {
         $set: {
-          title: req.body.title,
+          title: req.body.title.trim(),
           completed: req.body.completed,
         },
       });
 
       if (!result.matchedCount) {
-        return res.status(404).send({ error: "Todo not found" });
+        return res.status(404).json({ error: "Todo not found" });
       }
 
       const updatedTodo = await todoCollection.findOne(filter);
-      return res.status(200).send(updatedTodo);
+
+      if (!updatedTodo) {
+        console.error("Todo updated but could not be retrieved", {
+          todoId: req.params.id,
+          userId: req.user._id,
+        });
+        return res.status(500).json({ error: "Unable to update todo" });
+      }
+
+      return res.status(200).json({ todo: updatedTodo });
     } catch (error) {
       console.error(error);
-      return res.status(500).send({ error: "Unable to update todo" });
+      return res.status(500).json({ error: "Unable to update todo" });
     }
   });
 
   app.put("/api/todos/:id/complete", auth, async (req, res) => {
     if (!ObjectId.isValid(req.params.id)) {
-      return res.status(400).send({ error: "Invalid todo id" });
+      return res.status(400).json({ error: "Invalid todo id" });
+    }
+
+    const validationError = validateTodoCompletePayload(req.body);
+    if (validationError) {
+      return res.status(400).json({ error: validationError });
     }
 
     try {
@@ -218,20 +310,29 @@ MongoClient.connect(connectionString).then((client) => {
       });
 
       if (!result.matchedCount) {
-        return res.status(404).send({ error: "Todo not found" });
+        return res.status(404).json({ error: "Todo not found" });
       }
 
       const updatedTodo = await todoCollection.findOne(filter);
-      return res.status(200).send(updatedTodo);
+
+      if (!updatedTodo) {
+        console.error("Todo completion updated but could not be retrieved", {
+          todoId: req.params.id,
+          userId: req.user._id,
+        });
+        return res.status(500).json({ error: "Unable to update todo" });
+      }
+
+      return res.status(200).json({ todo: updatedTodo });
     } catch (error) {
       console.error(error);
-      return res.status(500).send({ error: "Unable to update todo" });
+      return res.status(500).json({ error: "Unable to update todo" });
     }
   });
 
   app.delete("/api/todos/:id", auth, async (req, res) => {
     if (!ObjectId.isValid(req.params.id)) {
-      return res.status(400).send({ error: "Invalid todo id" });
+      return res.status(400).json({ error: "Invalid todo id" });
     }
 
     try {
@@ -240,13 +341,13 @@ MongoClient.connect(connectionString).then((client) => {
       );
 
       if (!result.deletedCount) {
-        return res.status(404).send({ error: "Todo not found" });
+        return res.status(404).json({ error: "Todo not found" });
       }
 
-      return res.status(200).json({ message: `Deleted ${req.params.id}` });
+      return res.status(200).json({ deletedId: req.params.id });
     } catch (error) {
       console.error(error);
-      return res.status(500).send({ error: "Unable to delete todo" });
+      return res.status(500).json({ error: "Unable to delete todo" });
     }
   });
 
