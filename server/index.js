@@ -52,24 +52,8 @@ MongoClient.connect(connectionString).then((client) => {
   };
 
   const validateTodoEditPayload = (body) => {
-    if (!isPlainObject(body)) {
-      return "Request body must be a JSON object";
-    }
-
-    const unexpectedFields = getUnexpectedFields(body, ["title", "completed"]);
-    if (unexpectedFields.length) {
-      return `Unexpected fields: ${unexpectedFields.join(", ")}`;
-    }
-
-    if (typeof body.title !== "string" || !body.title.trim()) {
-      return "Title is required";
-    }
-
-    if (typeof body.completed !== "boolean") {
-      return "Completed must be a boolean";
-    }
-
-    return null;
+    // Reuse the create payload validator to keep allowed fields and rules in one place
+    return validateTodoCreatePayload(body);
   };
 
   const validateTodoCompletePayload = (body) => {
@@ -253,6 +237,13 @@ MongoClient.connect(connectionString).then((client) => {
         userId: req.user._id,
       });
 
+      if (!createdTodo) {
+        console.error("Todo created but could not be retrieved", {
+          insertedId: result.insertedId,
+          userId: req.user._id,
+        });
+        return res.status(500).json({ error: "Unable to create todo" });
+      }
       return res.status(201).json({ todo: createdTodo });
     } catch (error) {
       console.error(error);
