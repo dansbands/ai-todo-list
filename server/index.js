@@ -76,29 +76,36 @@ MongoClient.connect(connectionString).then((client) => {
   });
 
   app.post("/signup", async (req, res) => {
-    let user = await usersCollection.findOne({ email: req.body.email });
-    if (user) return res.status(400).send({ error: "User already registered" });
+    try {
+      let user = await usersCollection.findOne({ email: req.body.email });
+      if (user) {
+        return res.status(400).send({ error: "User already registered" });
+      }
 
-    user = req.body;
-    user.password = await bcrypt.hash(user.password, 10);
-    usersCollection
-      .insertOne(user)
-      .then((result) => {
-        const userId = String(result.insertedId);
-        const token = jwt.sign(
-          { _id: userId },
-          process.env.JWT_PRIVATE_KEY
-          // { expiresIn: "1800s" }
-        );
-        res.header("Authorization", `Bearer ${token}`).status(201).send({
-          token,
-          _id: userId,
-          firstName: user.firstName,
-          lastName: user.lastName,
-          email: user.email,
-        });
-      })
-      .catch((error) => console.error(error));
+      user = {
+        ...req.body,
+        password: await bcrypt.hash(req.body.password, 10),
+      };
+
+      const result = await usersCollection.insertOne(user);
+      const userId = String(result.insertedId);
+      const token = jwt.sign(
+        { _id: userId },
+        process.env.JWT_PRIVATE_KEY
+        // { expiresIn: "1800s" }
+      );
+
+      return res.header("Authorization", `Bearer ${token}`).status(201).send({
+        token,
+        _id: userId,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+      });
+    } catch (error) {
+      console.error(error);
+      return res.status(500).send({ error: "Unable to sign up user" });
+    }
   });
 
   app.post("/signin", async (req, res) => {

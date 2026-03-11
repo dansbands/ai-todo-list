@@ -9,7 +9,7 @@ const baseHeaders = {
   Accept: "application/json",
 };
 
-const getStoredValue = (key) => {
+export const getStoredValue = (key) => {
   const storedValue = localStorage.getItem(key);
 
   if (!storedValue) {
