@@ -275,6 +275,15 @@ MongoClient.connect(connectionString).then((client) => {
       }
 
       const updatedTodo = await todoCollection.findOne(filter);
+
+      if (!updatedTodo) {
+        console.error("Todo updated but could not be retrieved", {
+          todoId: req.params.id,
+          userId: req.user._id,
+        });
+        return res.status(500).json({ error: "Unable to update todo" });
+      }
+
       return res.status(200).json({ todo: updatedTodo });
     } catch (error) {
       console.error(error);
@@ -305,6 +314,15 @@ MongoClient.connect(connectionString).then((client) => {
       }
 
       const updatedTodo = await todoCollection.findOne(filter);
+
+      if (!updatedTodo) {
+        console.error("Todo completion updated but could not be retrieved", {
+          todoId: req.params.id,
+          userId: req.user._id,
+        });
+        return res.status(500).json({ error: "Unable to update todo" });
+      }
+
       return res.status(200).json({ todo: updatedTodo });
     } catch (error) {
       console.error(error);

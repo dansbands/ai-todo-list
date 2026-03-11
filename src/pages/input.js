@@ -10,7 +10,13 @@ const Input = ({
   setInputError,
 }) => {
   const handleInputChange = (e) => {
-    if (inputError) setInputError({[title]: false});
+    if (inputError) {
+      const errorKey = name || title;
+      setInputError((prevState) => ({
+        ...prevState,
+        [errorKey]: false,
+      }));
+    }
     setInputValue((prevState) => ({
       ...prevState,
       [e.target.name]: e.target.value,

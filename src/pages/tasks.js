@@ -157,6 +157,7 @@ const Tasks = () => {
             <div className="task-form-left">
               <Input
                 name="taskName"
+                title="Task Name"
                 inputValue={inputValue?.taskName}
                 inputError={inputError?.taskName}
                 setInputValue={setInputValue}
