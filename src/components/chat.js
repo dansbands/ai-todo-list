@@ -2,16 +2,44 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { getAuthHeaders, serverUrl } from "../util/fetch";
 
+const getFallbackChatResponse = (content = "") => ({
+  message: typeof content === "string" ? content : "",
+  links: [],
+  googleSearch: "",
+});
+
+const parseChatContent = (content) => {
+  if (!content || typeof content !== "string") {
+    return getFallbackChatResponse();
+  }
+
+  const normalizedContent = content
+    .trim()
+    .replace(/^```json\s*/i, "")
+    .replace(/^```\s*/i, "")
+    .replace(/\s*```$/, "");
+
+  try {
+    return JSON.parse(normalizedContent);
+  } catch (error) {
+    try {
+      return JSON.parse(normalizedContent.replace(/,\s*([}\]])/g, "$1"));
+    } catch (parseError) {
+      return getFallbackChatResponse(normalizedContent);
+    }
+  }
+};
+
 const Chat = ({ title, todoId, chatResponse }) => {
   const chatContent =
     chatResponse?.choices[0]?.message?.content &&
-    JSON.parse(chatResponse?.choices[0]?.message?.content);
+    parseChatContent(chatResponse?.choices[0]?.message?.content);
 
   const [message, setMessage] = useState("");
   const [response, setResponse] = useState(chatContent || {});
   const [loading, setLoading] = useState(false);
 
-  const prompt = `I need to ${title}. How can I best accomplish this? Additionally, can you please provide a list of web resources for how to ${title} in json format with linkTitle, url, and description? Finally, can you provide an optimized search string on this topic for a google search? Format the entire answer as a json object of {message, links, googleSearch}`;
+  const prompt = `I need to ${title}. How can I best accomplish this? Additionally, can you provide a list of web resources for how to ${title} in JSON format with linkTitle, url, and description? Finally, can you provide an optimized search string on this topic for a Google search? Return only valid JSON as a single object with the shape {"message":"string","links":[{"linkTitle":"string","url":"string","description":"string"}],"googleSearch":"string"}. Do not include markdown code fences, comments, trailing commas, or any text before or after the JSON.`;
   const searchTermQueryString = title?.split(" ").join("%20");
   const googleLink = `https://www.google.com/search?q=${searchTermQueryString}`;
 
@@ -22,25 +50,35 @@ const Chat = ({ title, todoId, chatResponse }) => {
   const sendMessage = async () => {
     setLoading(true);
 
-    const result = await axios.post(
-      `${serverUrl}/api/chat`,
-      {
-        message,
-        todoId,
-      },
-      {
-        headers: getAuthHeaders(),
-      }
-    );
+    try {
+      const result = await axios.post(
+        `${serverUrl}/api/chat`,
+        {
+          message,
+          todoId,
+        },
+        {
+          headers: getAuthHeaders(),
+        }
+      );
 
-    setResponse(JSON.parse(result.data.choices[0].message.content));
-    setMessage("");
-    setLoading(false);
+      setResponse(parseChatContent(result.data.choices[0].message.content));
+      setMessage("");
+    } catch (error) {
+      console.error("Error sending chat message:", error);
+      setResponse(
+        getFallbackChatResponse(
+          "The AI response could not be loaded right now. Please try again."
+        )
+      );
+    } finally {
+      setLoading(false);
+    }
   };
 
   const renderLinks = () => (
     <ul className="chat-links">
-      {response?.links?.map((link) => (
+      {(Array.isArray(response?.links) ? response.links : []).map((link) => (
         <li key={link.description} className="chat-link-item">
           <div>{link.linkTitle}</div>
           <a href={link.url} target="_blank" rel="noreferrer">
