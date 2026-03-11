@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { serverUrl } from "../util/fetch";
+import { getAuthHeaders, serverUrl } from "../util/fetch";
 
 const Chat = ({ title, todoId, chatResponse }) => {
   const chatContent =
@@ -22,10 +22,16 @@ const Chat = ({ title, todoId, chatResponse }) => {
   const sendMessage = async () => {
     setLoading(true);
 
-    const result = await axios.post(`${serverUrl}/api/chat`, {
-      message,
-      todoId,
-    });
+    const result = await axios.post(
+      `${serverUrl}/api/chat`,
+      {
+        message,
+        todoId,
+      },
+      {
+        headers: getAuthHeaders(),
+      }
+    );
 
     setResponse(JSON.parse(result.data.choices[0].message.content));
     setMessage("");

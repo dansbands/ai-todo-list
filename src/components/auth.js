@@ -2,13 +2,27 @@ import React, { useState } from "react";
 
 export const AuthContext = React.createContext(null);
 
+const getStoredValue = (key) => {
+  const storedValue = localStorage.getItem(key);
+
+  if (!storedValue) {
+    return null;
+  }
+
+  try {
+    return JSON.parse(storedValue);
+  } catch (error) {
+    return storedValue;
+  }
+};
+
 const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(localStorage.getItem("user"));
+  const [user, setUser] = useState(() => getStoredValue("user"));
 
   const signIn = (newUser, callback) => {
     setUser(newUser);
     localStorage.setItem("user", JSON.stringify(newUser));
-    localStorage.setItem("token", JSON.stringify(newUser.token));
+    localStorage.setItem("token", newUser.token);
     callback();
   };
 
