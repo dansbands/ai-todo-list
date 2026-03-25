@@ -6,46 +6,33 @@ const getFallbackChatResponse = (content = "") => ({
   message: typeof content === "string" ? content : "",
   links: [],
   googleSearch: "",
+  steps: [],
 });
 
-const parseChatContent = (content) => {
-  if (!content || typeof content !== "string") {
+const normalizeChatResponse = (response) => {
+  if (!response || typeof response !== "object") {
     return getFallbackChatResponse();
   }
 
-  const normalizedContent = content
-    .trim()
-    .replace(/^```json\s*/i, "")
-    .replace(/^```\s*/i, "")
-    .replace(/\s*```$/, "");
-
-  try {
-    return JSON.parse(normalizedContent);
-  } catch (error) {
-    try {
-      return JSON.parse(normalizedContent.replace(/,\s*([}\]])/g, "$1"));
-    } catch (parseError) {
-      return getFallbackChatResponse(normalizedContent);
-    }
-  }
+  return {
+    message: typeof response.message === "string" ? response.message : "",
+    links: Array.isArray(response.links) ? response.links : [],
+    googleSearch:
+      typeof response.googleSearch === "string" ? response.googleSearch : "",
+    steps: Array.isArray(response.steps) ? response.steps : [],
+  };
 };
 
 const Chat = ({ title, todoId, chatResponse }) => {
-  const chatContent =
-    chatResponse?.choices[0]?.message?.content &&
-    parseChatContent(chatResponse?.choices[0]?.message?.content);
+  const chatContent = normalizeChatResponse(chatResponse);
 
   const [message, setMessage] = useState("");
   const [response, setResponse] = useState(chatContent || {});
   const [loading, setLoading] = useState(false);
 
-  const prompt = `I need to ${title}. How can I best accomplish this? Additionally, can you provide a list of web resources for how to ${title} in JSON format with linkTitle, url, and description? Finally, can you provide an optimized search string on this topic for a Google search? Return only valid JSON as a single object with the shape {"message":"string","links":[{"linkTitle":"string","url":"string","description":"string"}],"googleSearch":"string"}. Do not include markdown code fences, comments, trailing commas, or any text before or after the JSON.`;
-  const searchTermQueryString = title?.split(" ").join("%20");
-  const googleLink = `https://www.google.com/search?q=${searchTermQueryString}`;
-
   useEffect(() => {
-    if (title) setMessage(prompt);
-  }, [title, prompt]);
+    setResponse(normalizeChatResponse(chatResponse));
+  }, [chatResponse]);
 
   const sendMessage = async () => {
     setLoading(true);
@@ -54,15 +41,15 @@ const Chat = ({ title, todoId, chatResponse }) => {
       const result = await axios.post(
         `${serverUrl}/api/chat`,
         {
-          message,
           todoId,
+          ...(message.trim() ? { message } : {}),
         },
         {
           headers: getAuthHeaders(),
         }
       );
 
-      setResponse(parseChatContent(result.data.choices[0].message.content));
+      setResponse(normalizeChatResponse(result.data));
       setMessage("");
     } catch (error) {
       console.error("Error sending chat message:", error);
@@ -79,7 +66,7 @@ const Chat = ({ title, todoId, chatResponse }) => {
   const renderLinks = () => (
     <ul className="chat-links">
       {(Array.isArray(response?.links) ? response.links : []).map((link) => (
-        <li key={link.description} className="chat-link-item">
+        <li key={`${link.url}-${link.linkTitle}`} className="chat-link-item">
           <div>{link.linkTitle}</div>
           <a href={link.url} target="_blank" rel="noreferrer">
             {link.url}
@@ -89,6 +76,19 @@ const Chat = ({ title, todoId, chatResponse }) => {
       ))}
     </ul>
   );
+
+  const renderSteps = () =>
+    Array.isArray(response?.steps) && response.steps.length ? (
+      <ol className="chat-steps">
+        {response.steps.map((step) => (
+          <li key={step}>{step}</li>
+        ))}
+      </ol>
+    ) : null;
+
+  const googleLink = response.googleSearch
+    ? `https://www.google.com/search?q=${encodeURIComponent(response.googleSearch)}`
+    : null;
 
   return (
     <div>
@@ -113,22 +113,30 @@ const Chat = ({ title, todoId, chatResponse }) => {
               <h3>🧠 Plan</h3>
               <div>{response.message}</div>
             </div>
+            {renderSteps() && (
+              <div className="chat-section">
+                <h3>🪜 Steps</h3>
+                {renderSteps()}
+              </div>
+            )}
             <div className="chat-section">
               <h3>🔗 Resources</h3>
               {renderLinks()}
             </div>
 
-            <div className="chat-section">
-              <h3>🔍 Search on Google</h3>
-              <a
-                href={googleLink}
-                className="chat-search-link"
-                target="_blank"
-                rel="noreferrer"
-              >
-                continue search on Google
-              </a>
-            </div>
+            {googleLink && (
+              <div className="chat-section">
+                <h3>🔍 Search on Google</h3>
+                <a
+                  href={googleLink}
+                  className="chat-search-link"
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  continue search on Google
+                </a>
+              </div>
+            )}
           </>
         </div>
       )}

@@ -2,11 +2,11 @@ const express = require("express");
 require("dotenv").config();
 const bodyParser = require("body-parser");
 const { MongoClient, ObjectId } = require("mongodb");
-const axios = require("axios");
 const cors = require("cors");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const auth = require("./middleware/auth");
+const { getGuidance } = require("./services/aiService");
 const app = express();
 
 const isDev = process.env.NODE_ENV === "development";
@@ -68,6 +68,30 @@ MongoClient.connect(connectionString).then((client) => {
 
     if (typeof body.completed !== "boolean") {
       return "Completed must be a boolean";
+    }
+
+    return null;
+  };
+
+  const validateChatPayload = (body) => {
+    if (!isPlainObject(body)) {
+      return "Request body must be a JSON object";
+    }
+
+    const unexpectedFields = getUnexpectedFields(body, ["todoId", "message"]);
+    if (unexpectedFields.length) {
+      return `Unexpected fields: ${unexpectedFields.join(", ")}`;
+    }
+
+    if (typeof body.todoId !== "string" || !body.todoId.trim()) {
+      return "todoId is required";
+    }
+
+    if (
+      body.message !== undefined &&
+      (typeof body.message !== "string" || !body.message.trim())
+    ) {
+      return "message must be a non-empty string when provided";
     }
 
     return null;
@@ -354,41 +378,39 @@ MongoClient.connect(connectionString).then((client) => {
   // Chat Routes
 
   app.post("/api/chat", auth, async (req, res) => {
+    const validationError = validateChatPayload(req.body);
+    if (validationError) {
+      return res.status(400).json({ error: validationError });
+    }
+
     const { message, todoId } = req.body;
 
     if (!ObjectId.isValid(todoId)) {
-      return res.status(400).send({ error: "Invalid todo id" });
+      return res.status(400).json({ error: "Invalid todo id" });
     }
 
     try {
       const todo = await todoCollection.findOne(getTodoFilter(todoId, req.user._id));
 
       if (!todo) {
-        return res.status(404).send({ error: "Todo not found" });
+        return res.status(404).json({ error: "Todo not found" });
       }
 
-      const response = await axios.post(
-        "https://api.openai.com/v1/chat/completions",
-        {
-          model: "gpt-3.5-turbo",
-          messages: [{ role: "user", content: message }],
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      const guidance = await getGuidance({
+        todoTitle: todo.title,
+        userMessage: message,
+      });
+
       await todoCollection.updateOne(getTodoFilter(todoId, req.user._id), {
         $set: {
-          response: response.data,
+          response: guidance,
         },
       });
-      return res.status(200).send(response.data);
+
+      return res.status(200).json(guidance);
     } catch (error) {
       console.error(error);
-      return res.status(500).send({ error: "Error processing the AI request" });
+      return res.status(500).json({ error: "Error processing the AI request" });
     }
   });
 
