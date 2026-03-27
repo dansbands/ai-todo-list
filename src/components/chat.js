@@ -16,10 +16,20 @@ const normalizeChatResponse = (response) => {
 
   return {
     message: typeof response.message === "string" ? response.message : "",
-    links: Array.isArray(response.links) ? response.links : [],
+    links: Array.isArray(response.links)
+      ? response.links.filter(
+          (link) =>
+            link &&
+            typeof link === "object" &&
+            typeof link.linkTitle === "string" &&
+            typeof link.url === "string"
+        )
+      : [],
     googleSearch:
       typeof response.googleSearch === "string" ? response.googleSearch : "",
-    steps: Array.isArray(response.steps) ? response.steps : [],
+    steps: Array.isArray(response.steps)
+      ? response.steps.filter((step) => typeof step === "string")
+      : [],
   };
 };
 
