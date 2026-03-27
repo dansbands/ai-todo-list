@@ -155,14 +155,17 @@ const getAiErrorMessage = (error) => {
   return "Unknown AI service error";
 };
 
+class AiServiceUnavailableError extends Error {
+  constructor(message = AI_UNAVAILABLE_MESSAGE) {
+    super(message);
+    this.name = "AiServiceUnavailableError";
+  }
+}
+
 const getGuidance = async ({ todoTitle = "", userMessage = "" }) => {
   if (!process.env.OPENAI_API_KEY) {
     console.error("OPENAI_API_KEY is not configured");
-    return getFallbackGuidance({
-      todoTitle,
-      userMessage,
-      rawContent: AI_UNAVAILABLE_MESSAGE,
-    });
+    throw new AiServiceUnavailableError();
   }
 
   const prompt = buildPrompt({ todoTitle, userMessage });
@@ -191,15 +194,12 @@ const getGuidance = async ({ todoTitle = "", userMessage = "" }) => {
   } catch (error) {
     console.error("AI guidance request failed:", getAiErrorMessage(error));
 
-    return getFallbackGuidance({
-      todoTitle,
-      userMessage,
-      rawContent: AI_UNAVAILABLE_MESSAGE,
-    });
+    throw new AiServiceUnavailableError();
   }
 };
 
 module.exports = {
+  AiServiceUnavailableError,
   buildPrompt,
   getGuidance,
   normalizeGuidance,

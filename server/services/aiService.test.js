@@ -2,8 +2,10 @@ const test = require("node:test");
 const assert = require("node:assert/strict");
 
 const {
+  AiServiceUnavailableError,
   buildPrompt,
   getFallbackGuidance,
+  getGuidance,
   normalizeGuidance,
   parseModelContent,
 } = require("./aiService");
@@ -98,4 +100,26 @@ test("getFallbackGuidance prefers todo title for google search", () => {
     googleSearch: "assemble desk",
     steps: [],
   });
+});
+
+test("getGuidance throws when the OpenAI API key is missing", async () => {
+  const originalApiKey = process.env.OPENAI_API_KEY;
+  delete process.env.OPENAI_API_KEY;
+
+  await assert.rejects(
+    getGuidance({
+      todoTitle: "assemble desk",
+      userMessage: "with one person",
+    }),
+    (error) =>
+      error instanceof AiServiceUnavailableError &&
+      error.message ===
+        "AI guidance is temporarily unavailable. Please try again in a moment."
+  );
+
+  if (originalApiKey === undefined) {
+    delete process.env.OPENAI_API_KEY;
+  } else {
+    process.env.OPENAI_API_KEY = originalApiKey;
+  }
 });
