@@ -6,7 +6,7 @@ import { useAuth } from "../components/auth";
 
 // @TODO: revisit and fix after testing behavior in production
 const SignIn = () => {
-  const [pageLoadingState, setPageLoadingState] = useState(null);
+  const [, setPageLoadingState] = useState(null);
   const [showSignUp, setShowSignUp] = useState(false);
   const [inputValue, setInputValue] = useState({
     email: "guest@guest.com",
