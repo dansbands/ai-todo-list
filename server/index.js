@@ -6,7 +6,10 @@ const cors = require("cors");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const auth = require("./middleware/auth");
-const { getGuidance } = require("./services/aiService");
+const {
+  AiServiceUnavailableError,
+  getGuidance,
+} = require("./services/aiService");
 const app = express();
 
 const isDev = process.env.NODE_ENV === "development";
@@ -409,6 +412,12 @@ MongoClient.connect(connectionString).then((client) => {
 
       return res.status(200).json(guidance);
     } catch (error) {
+      if (error instanceof AiServiceUnavailableError) {
+        return res
+          .status(error.statusCode)
+          .json({ error: error.message });
+      }
+
       console.error(error);
       return res.status(500).json({ error: "Error processing the AI request" });
     }

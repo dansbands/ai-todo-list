@@ -9,21 +9,40 @@ const getFallbackChatResponse = (content = "") => ({
   steps: [],
 });
 
+const getLegacyChatContent = (response) =>
+  typeof response?.choices?.[0]?.message?.content === "string"
+    ? response.choices[0].message.content
+    : "";
+
 const normalizeChatResponse = (response) => {
   if (!response || typeof response !== "object") {
     return getFallbackChatResponse();
   }
 
+  const message =
+    typeof response.message === "string" ? response.message : "";
+  const legacyContent = getLegacyChatContent(response);
+
+  if (!message && legacyContent) {
+    return getFallbackChatResponse(legacyContent);
+  }
+
   return {
-    message: typeof response.message === "string" ? response.message : "",
+    message,
     links: Array.isArray(response.links)
-      ? response.links.filter(
-          (link) =>
-            link &&
-            typeof link === "object" &&
-            typeof link.linkTitle === "string" &&
-            typeof link.url === "string"
-        )
+      ? response.links
+          .filter(
+            (link) =>
+              link &&
+              typeof link === "object" &&
+              typeof link.linkTitle === "string" &&
+              typeof link.url === "string"
+          )
+          .map((link) => ({
+            ...link,
+            description:
+              typeof link.description === "string" ? link.description : "",
+          }))
       : [],
     googleSearch:
       typeof response.googleSearch === "string" ? response.googleSearch : "",
@@ -90,8 +109,8 @@ const Chat = ({ title, todoId, chatResponse }) => {
   const renderSteps = () =>
     Array.isArray(response?.steps) && response.steps.length ? (
       <ol className="chat-steps">
-        {response.steps.map((step) => (
-          <li key={step}>{step}</li>
+        {response.steps.map((step, index) => (
+          <li key={`${index}-${step}`}>{step}</li>
         ))}
       </ol>
     ) : null;

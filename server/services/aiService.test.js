@@ -59,6 +59,32 @@ test("normalizeGuidance returns the expected schema for partial payloads", () =>
   });
 });
 
+test("normalizeGuidance drops unsafe link protocols", () => {
+  const guidance = normalizeGuidance({
+    message: "Use a trusted resource.",
+    links: [
+      {
+        linkTitle: "Safe",
+        url: "https://example.com",
+        description: "Allowed",
+      },
+      {
+        linkTitle: "Unsafe",
+        url: "javascript:alert(1)",
+        description: "Should be removed",
+      },
+    ],
+  });
+
+  assert.deepEqual(guidance.links, [
+    {
+      linkTitle: "Safe",
+      url: "https://example.com",
+      description: "Allowed",
+    },
+  ]);
+});
+
 test("parseModelContent strips code fences and trailing commas", () => {
   const guidance = parseModelContent(
     '```json\n{"message":"Do this","links":[],"googleSearch":"test","steps":["one",],}\n```',

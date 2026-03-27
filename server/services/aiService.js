@@ -8,6 +8,19 @@ const AI_UNAVAILABLE_MESSAGE =
 const isPlainObject = (value) =>
   Boolean(value) && typeof value === "object" && !Array.isArray(value);
 
+const isSafeHttpUrl = (value) => {
+  if (typeof value !== "string" || !value.trim()) {
+    return false;
+  }
+
+  try {
+    const parsedUrl = new URL(value.trim());
+    return parsedUrl.protocol === "http:" || parsedUrl.protocol === "https:";
+  } catch (error) {
+    return false;
+  }
+};
+
 const getFallbackGuidance = ({ todoTitle = "", userMessage = "", rawContent = "" } = {}) => ({
   message:
     typeof rawContent === "string" && rawContent.trim()
@@ -33,7 +46,7 @@ const normalizeLink = (link) => {
   const description =
     typeof link.description === "string" ? link.description.trim() : "";
 
-  if (!linkTitle || !url) {
+  if (!linkTitle || !isSafeHttpUrl(url)) {
     return null;
   }
 
@@ -156,9 +169,10 @@ const getAiErrorMessage = (error) => {
 };
 
 class AiServiceUnavailableError extends Error {
-  constructor(message = AI_UNAVAILABLE_MESSAGE) {
+  constructor(message = AI_UNAVAILABLE_MESSAGE, options = {}) {
     super(message);
     this.name = "AiServiceUnavailableError";
+    this.statusCode = options.statusCode || 503;
   }
 }
 
@@ -182,6 +196,7 @@ const getGuidance = async ({ todoTitle = "", userMessage = "" }) => {
           Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
           "Content-Type": "application/json",
         },
+        timeout: 15000,
       }
     );
 
