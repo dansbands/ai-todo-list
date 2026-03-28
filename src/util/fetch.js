@@ -1,9 +1,15 @@
 import axios from "axios";
 
-export const serverUrl =
+const DEFAULT_PROD_SERVER_URL = "https://ai-todo-list.onrender.com";
+
+const normalizeBaseUrl = (value) =>
+  typeof value === "string" ? value.trim().replace(/\/+$/, "") : "";
+
+export const serverUrl = normalizeBaseUrl(
   process.env.NODE_ENV === "development"
     ? process.env.REACT_APP_SERVER_URL
-    : process.env.REACT_APP_PROD_SERVER_URL;
+    : process.env.REACT_APP_PROD_SERVER_URL || DEFAULT_PROD_SERVER_URL
+);
 const baseHeaders = {
   "Content-Type": "application/json",
   Accept: "application/json",
