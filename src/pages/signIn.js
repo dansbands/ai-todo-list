@@ -8,6 +8,7 @@ import { useAuth } from "../components/auth";
 const SignIn = () => {
   const [, setPageLoadingState] = useState(null);
   const [showSignUp, setShowSignUp] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [inputValue, setInputValue] = useState({
     email: "guest@guest.com",
     password: "abc123",
@@ -30,16 +31,20 @@ const SignIn = () => {
 
   const handleSubmit = async () => {
     if (inputValue.email && inputValue.password) {
+      setAuthError("");
+      setIsSubmitting(true);
+
       await postExistingUser(inputValue)
         .then((res) => {
           auth.signIn(res.data, () => navigate("/"));
-        }) // handle res from from server/index.js
+        })
         .then(() => {
           setInputValue({ email: "", password: "" });
         })
         .catch((err) =>
           setAuthError(err?.response?.data?.error || "Error logging in")
-        );
+        )
+        .finally(() => setIsSubmitting(false));
     } else {
       setInputError({
         email: !inputValue.email,
@@ -74,8 +79,20 @@ const SignIn = () => {
               handleSubmit={handleSubmit}
             />
             {authError && <div className="auth-error">{authError}</div>}
-            <button type="submit" onClick={handleSubmit}>
-              Sign In
+            <button
+              type="submit"
+              onClick={handleSubmit}
+              disabled={isSubmitting}
+              className={isSubmitting ? "auth-submit-button is-loading" : "auth-submit-button"}
+            >
+              {isSubmitting ? (
+                <>
+                  <span className="button-spinner" aria-hidden="true"></span>
+                  <span>Signing In...</span>
+                </>
+              ) : (
+                "Sign In"
+              )}
             </button>
             <div className="sign-up-links">
               <Link to="/sign-up">Sign Up instead</Link>
