@@ -1,15 +1,17 @@
 import axios from "axios";
 
-const DEFAULT_PROD_SERVER_URL = "https://ai-todo-list.onrender.com";
-
 const normalizeBaseUrl = (value) =>
   typeof value === "string" ? value.trim().replace(/\/+$/, "") : "";
 
-export const serverUrl = normalizeBaseUrl(
+const apiBaseUrl = normalizeBaseUrl(
   process.env.NODE_ENV === "development"
     ? process.env.REACT_APP_SERVER_URL
-    : process.env.REACT_APP_PROD_SERVER_URL || DEFAULT_PROD_SERVER_URL
+    : process.env.REACT_APP_PROD_SERVER_URL || ""
 );
+
+export const serverUrl = apiBaseUrl;
+
+const getUrl = (path) => `${apiBaseUrl}${path}`;
 const baseHeaders = {
   "Content-Type": "application/json",
   Accept: "application/json",
@@ -44,9 +46,9 @@ const getConfig = (withAuth = false) => ({
   headers: withAuth ? getAuthHeaders() : baseHeaders,
 });
 
-const appUrl = `${serverUrl}/`;
-const todosUrl = `${serverUrl}/api/todos`;
-const userTodosUrl = `${serverUrl}/api/user/todos`;
+const appUrl = getUrl("/api/health");
+const todosUrl = getUrl("/api/todos");
+const userTodosUrl = getUrl("/api/user/todos");
 
 const getTodosFromResponse = (data) => {
   if (Array.isArray(data)) {
@@ -138,21 +140,21 @@ export const completeTodo = async (todo) => {
 };
 
 export const deleteTodo = async (id) => {
-  const url = `${serverUrl}/api/todos/${id}`;
+  const url = getUrl(`/api/todos/${id}`);
 
   const message = await axios.delete(url, getConfig(true));
   return getDeleteResponse(message.data);
 };
 
 export const postNewUser = async (formValues) => {
-  const url = `${serverUrl}/signup`;
+  const url = getUrl("/api/signup");
 
   const data = await axios.post(url, formValues, getConfig());
   return data;
 };
 
 export const postExistingUser = async (formValues) => {
-  const url = `${serverUrl}/signin`;
+  const url = getUrl("/api/signin");
 
   const data = await axios.post(url, formValues, getConfig());
   return data;
