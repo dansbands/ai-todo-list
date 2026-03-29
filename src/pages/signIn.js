@@ -1,7 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Input from "./input";
-import { getApp, postExistingUser } from "../util/fetch";
+import {
+  getApp,
+  getRequestErrorMessage,
+  postExistingUser,
+} from "../util/fetch";
 import { useAuth } from "../components/auth";
 
 // @TODO: revisit and fix after testing behavior in production
@@ -41,9 +45,7 @@ const SignIn = () => {
         .then(() => {
           setInputValue({ email: "", password: "" });
         })
-        .catch((err) =>
-          setAuthError(err?.response?.data?.error || "Error logging in")
-        )
+        .catch((err) => setAuthError(getRequestErrorMessage(err, "Error logging in")))
         .finally(() => setIsSubmitting(false));
     } else {
       setInputError({

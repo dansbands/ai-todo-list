@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Input from "./input";
-import { getApp, postNewUser } from "../util/fetch";
+import { getApp, getRequestErrorMessage, postNewUser } from "../util/fetch";
 import { useAuth } from "../components/auth";
 import LoadingWrapper from "../components/loading-wrapper";
 
@@ -54,9 +54,7 @@ const SignUp = () => {
             password: "",
           });
         })
-        .catch((err) =>
-          setAuthError(err?.response?.data?.error || "Error signing up")
-        )
+        .catch((err) => setAuthError(getRequestErrorMessage(err, "Error signing up")))
         .finally(() => setIsSubmitting(false));
     } else {
       setInputError({

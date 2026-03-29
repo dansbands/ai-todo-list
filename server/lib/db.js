@@ -2,13 +2,23 @@ const { MongoClient, ObjectId } = require("mongodb");
 
 const username = process.env.DB_USERNAME;
 const password = process.env.DB_PASSWORD;
-const connectionString = `mongodb+srv://${username}:${password}@cluster0.uojjxxo.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
+const hasDbCredentials = Boolean(username) && Boolean(password);
+const connectionString = hasDbCredentials
+  ? `mongodb+srv://${username}:${password}@cluster0.uojjxxo.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`
+  : "";
 
 let clientPromise;
 
 const getMongoClient = () => {
+  if (!hasDbCredentials) {
+    throw new Error("Database credentials are not configured");
+  }
+
   if (!clientPromise) {
-    clientPromise = MongoClient.connect(connectionString);
+    clientPromise = MongoClient.connect(connectionString, {
+      serverSelectionTimeoutMS: 8000,
+      connectTimeoutMS: 8000,
+    });
   }
 
   return clientPromise;

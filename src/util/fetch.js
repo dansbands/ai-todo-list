@@ -31,6 +31,29 @@ export const getStoredValue = (key) => {
   }
 };
 
+export const getRequestErrorMessage = (error, fallbackMessage) => {
+  const errorPayload = error?.response?.data?.error ?? error?.response?.data;
+
+  if (typeof errorPayload === "string" && errorPayload.trim()) {
+    return errorPayload;
+  }
+
+  if (
+    errorPayload &&
+    typeof errorPayload === "object" &&
+    typeof errorPayload.message === "string" &&
+    errorPayload.message.trim()
+  ) {
+    return errorPayload.message;
+  }
+
+  if (typeof error?.message === "string" && error.message.trim()) {
+    return error.message;
+  }
+
+  return fallbackMessage;
+};
+
 export const getAuthHeaders = () => {
   const token = getStoredValue("token");
 
