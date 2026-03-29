@@ -24,6 +24,8 @@ const corsOptions = {
   optionsSuccessStatus: 201,
 };
 
+const routePaths = (path) => [path, `/api${path}`];
+
 const getTodoFilter = (todoId, userId) => ({
   _id: new ObjectId(todoId),
   userId,
@@ -33,7 +35,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(cors(corsOptions));
 
-app.get("/api/health", (req, res) => {
+app.get(routePaths("/health"), (req, res) => {
   if (isDev) {
     setTimeout(() => {
       res.send("Got the app!!!");
@@ -43,7 +45,7 @@ app.get("/api/health", (req, res) => {
   }
 });
 
-app.get("/api/user", auth, async (req, res) => {
+app.get(routePaths("/user"), auth, async (req, res) => {
   if (!ObjectId.isValid(req.user._id)) {
     return res.status(401).send({ error: "Invalid token payload" });
   }
@@ -70,7 +72,7 @@ app.get("/api/user", auth, async (req, res) => {
   }
 });
 
-app.post("/api/signup", async (req, res) => {
+app.post(routePaths("/signup"), async (req, res) => {
   try {
     const { usersCollection } = await getCollections();
     let user = await usersCollection.findOne({ email: req.body.email });
@@ -101,7 +103,7 @@ app.post("/api/signup", async (req, res) => {
   }
 });
 
-app.post("/api/signin", async (req, res) => {
+app.post(routePaths("/signin"), async (req, res) => {
   try {
     const { usersCollection } = await getCollections();
     const user = await usersCollection.findOne({ email: req.body.email });
@@ -139,7 +141,7 @@ app.post("/api/signin", async (req, res) => {
   }
 });
 
-app.post("/api/user/todos", auth, async (req, res) => {
+app.post(routePaths("/user/todos"), auth, async (req, res) => {
   if (isPlainObject(req.body) && Object.keys(req.body).length > 0) {
     return res
       .status(400)
@@ -159,7 +161,7 @@ app.post("/api/user/todos", auth, async (req, res) => {
   }
 });
 
-app.get("/api/todos", auth, async (req, res) => {
+app.get(routePaths("/todos"), auth, async (req, res) => {
   try {
     const { todoCollection } = await getCollections();
     const todos = await todoCollection
@@ -173,7 +175,7 @@ app.get("/api/todos", auth, async (req, res) => {
   }
 });
 
-app.post("/api/todos", auth, async (req, res) => {
+app.post(routePaths("/todos"), auth, async (req, res) => {
   const validationError = validateTodoCreatePayload(req.body);
   if (validationError) {
     return res.status(400).json({ error: validationError });
@@ -208,7 +210,7 @@ app.post("/api/todos", auth, async (req, res) => {
   }
 });
 
-app.put("/api/todos/:id/edit", auth, async (req, res) => {
+app.put(routePaths("/todos/:id/edit"), auth, async (req, res) => {
   if (!ObjectId.isValid(req.params.id)) {
     return res.status(400).json({ error: "Invalid todo id" });
   }
@@ -249,7 +251,7 @@ app.put("/api/todos/:id/edit", auth, async (req, res) => {
   }
 });
 
-app.put("/api/todos/:id/complete", auth, async (req, res) => {
+app.put(routePaths("/todos/:id/complete"), auth, async (req, res) => {
   if (!ObjectId.isValid(req.params.id)) {
     return res.status(400).json({ error: "Invalid todo id" });
   }
@@ -289,7 +291,7 @@ app.put("/api/todos/:id/complete", auth, async (req, res) => {
   }
 });
 
-app.delete("/api/todos/:id", auth, async (req, res) => {
+app.delete(routePaths("/todos/:id"), auth, async (req, res) => {
   if (!ObjectId.isValid(req.params.id)) {
     return res.status(400).json({ error: "Invalid todo id" });
   }
@@ -311,7 +313,7 @@ app.delete("/api/todos/:id", auth, async (req, res) => {
   }
 });
 
-app.post("/api/chat", auth, async (req, res) => {
+app.post(routePaths("/chat"), auth, async (req, res) => {
   const validationError = validateChatPayload(req.body);
   if (validationError) {
     return res.status(400).json({ error: validationError });
