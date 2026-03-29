@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 
 const Input = ({
   name,
@@ -29,10 +29,10 @@ const Input = ({
 
   return (
     <div className="form-input-group">
-      <label htmlFor={name}>{title}</label>
       <input
         className="form-input"
         name={name}
+        placeholder={title}
         value={inputValue}
         onChange={handleInputChange}
         onKeyUp={checkForSubmit}

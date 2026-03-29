@@ -1,7 +1,7 @@
 {
   "name": "ai-todo-list",
   "version": "0.1.0",
-  "homepage": "https://dansbands.github.io/ai-todo-list/#",
+  "homepage": ".",
   "private": true,
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^6.5.2",
@@ -13,7 +13,12 @@
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
     "axios": "^1.6.8",
+    "bcrypt": "^5.1.1",
+    "cors": "^2.8.6",
     "dotenv": "^16.4.5",
+    "express": "^4.22.1",
+    "jsonwebtoken": "^9.0.3",
+    "mongodb": "^6.21.0",
     "react": "^18.2.0",
     "react-beautiful-dnd": "^13.1.1",
     "react-dom": "^18.2.0",

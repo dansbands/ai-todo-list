@@ -7,6 +7,8 @@ import LoadingWrapper from "../components/loading-wrapper";
 
 const SignUp = () => {
   const [pageLoadingState, setPageLoadingState] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [authError, setAuthError] = useState("");
   const [inputValue, setInputValue] = useState({
     firstName: "",
     lastName: "",
@@ -30,22 +32,32 @@ const SignUp = () => {
       .catch(() => setPageLoadingState("error"));
   }, []);
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (
       inputValue.firstName &&
       inputValue.lastName &&
       inputValue.email &&
       inputValue.password
     ) {
-      postNewUser(inputValue).then((res) => {
-        auth.signIn(res.data, () => navigate("/"));
-      }); // handle res from from server/index.js
-      setInputValue({
-        firstName: "",
-        lastName: "",
-        email: "",
-        password: "",
-      });
+      setAuthError("");
+      setIsSubmitting(true);
+
+      await postNewUser(inputValue)
+        .then((res) => {
+          auth.signIn(res.data, () => navigate("/"));
+        })
+        .then(() => {
+          setInputValue({
+            firstName: "",
+            lastName: "",
+            email: "",
+            password: "",
+          });
+        })
+        .catch((err) =>
+          setAuthError(err?.response?.data?.error || "Error signing up")
+        )
+        .finally(() => setIsSubmitting(false));
     } else {
       setInputError({
         firstName: !inputValue.firstName,
@@ -99,8 +111,21 @@ const SignUp = () => {
               setInputError={setInputError}
               handleSubmit={handleSubmit}
             />
-            <button type="submit" onClick={handleSubmit}>
-              Sign Up
+            {authError && <div className="auth-error">{authError}</div>}
+            <button
+              type="submit"
+              onClick={handleSubmit}
+              disabled={isSubmitting}
+              className={isSubmitting ? "auth-submit-button is-loading" : "auth-submit-button"}
+            >
+              {isSubmitting ? (
+                <>
+                  <span className="button-spinner" aria-hidden="true"></span>
+                  <span>Signing Up...</span>
+                </>
+              ) : (
+                "Sign Up"
+              )}
             </button>
             <div className="sign-up-links">
               <Link to="/sign-in">Sign In instead</Link>

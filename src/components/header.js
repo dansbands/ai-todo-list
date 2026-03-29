@@ -1,6 +1,6 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faRightToBracket, faUser } from "@fortawesome/free-solid-svg-icons";
-import { Link, Navigate, redirect, useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "./auth";
 import LogoLight from "../img/logo-light.jpeg";
 import LogoDark from "../img/logo-dark.jpeg";
