@@ -153,6 +153,12 @@ const Tasks = () => {
         </div>
       ) : (
         <>
+          {auth.user?.isGuest && (
+            <div className="guest-banner">
+              Guest mode: you can use AI guidance up to {auth.user.aiRequestLimit || 3} times.
+              Create an account to save your progress permanently.
+            </div>
+          )}
           <div className="task-form">
             <div className="task-form-left">
               <Input

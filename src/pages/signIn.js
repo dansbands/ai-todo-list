@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Input from "./input";
 import {
+  createGuestSession,
   getApp,
   getRequestErrorMessage,
   postExistingUser,
@@ -13,6 +14,7 @@ const SignIn = () => {
   const [, setPageLoadingState] = useState(null);
   const [showSignUp, setShowSignUp] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isGuestSubmitting, setIsGuestSubmitting] = useState(false);
   const [inputValue, setInputValue] = useState({
     email: "guest@guest.com",
     password: "abc123",
@@ -55,6 +57,20 @@ const SignIn = () => {
     }
   };
 
+  const handleContinueAsGuest = async () => {
+    setAuthError("");
+    setIsGuestSubmitting(true);
+
+    await createGuestSession()
+      .then((res) => {
+        auth.signIn(res.data, () => navigate("/"));
+      })
+      .catch((err) =>
+        setAuthError(getRequestErrorMessage(err, "Error creating guest session"))
+      )
+      .finally(() => setIsGuestSubmitting(false));
+  };
+
   return (
     <div className="sign-up-container">
       <div className={showSignUp ? "sign-up-left" : "sign-up-intro"}></div>
@@ -94,6 +110,21 @@ const SignIn = () => {
                 </>
               ) : (
                 "Sign In"
+              )}
+            </button>
+            <button
+              type="button"
+              onClick={handleContinueAsGuest}
+              disabled={isGuestSubmitting}
+              className={isGuestSubmitting ? "auth-submit-button is-loading" : "auth-submit-button"}
+            >
+              {isGuestSubmitting ? (
+                <>
+                  <span className="button-spinner" aria-hidden="true"></span>
+                  <span>Starting guest session...</span>
+                </>
+              ) : (
+                "Continue as Guest"
               )}
             </button>
             <div className="sign-up-links">

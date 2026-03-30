@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { getAuthHeaders, serverUrl } from "../util/fetch";
+import { getAuthHeaders, getRequestErrorMessage, serverUrl } from "../util/fetch";
 
 const getFallbackChatResponse = (content = "") => ({
   message: typeof content === "string" ? content : "",
@@ -82,9 +82,13 @@ const Chat = ({ title, todoId, chatResponse }) => {
       setMessage("");
     } catch (error) {
       console.error("Error sending chat message:", error);
+      const errorMessage = getRequestErrorMessage(
+        error,
+        "The AI response could not be loaded right now. Please try again."
+      );
       setResponse(
         getFallbackChatResponse(
-          "The AI response could not be loaded right now. Please try again."
+          errorMessage
         )
       );
     } finally {
