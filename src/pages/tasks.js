@@ -12,13 +12,23 @@ import {
 import loadingGif from "../img/loading.gif";
 import Input from "./input";
 import { useAuth } from "../components/auth";
+import GuestUpgradeModal from "../components/guest-upgrade-modal";
 
 const Tasks = () => {
   const [pageLoadingState, setPageLoadingState] = useState(null);
   const [allTasks, setAllTasks] = useState([]);
   const [inputValue, setInputValue] = useState({ taskName: "" });
   const [inputError, setInputError] = useState({ taskName: false });
+  const [isGuestUpgradeOpen, setGuestUpgradeOpen] = useState(false);
+  const [guestUpgradeMessage, setGuestUpgradeMessage] = useState("");
   const auth = useAuth();
+
+  useEffect(() => {
+    if (!auth.user?.isGuest) {
+      setGuestUpgradeOpen(false);
+      setGuestUpgradeMessage("");
+    }
+  }, [auth.user?.isGuest]);
 
   useEffect(() => {
     let isActive = true;
@@ -141,22 +151,40 @@ const Tasks = () => {
     }
   };
 
+  const openGuestUpgrade = (payload = {}) => {
+    setGuestUpgradeMessage(
+      typeof payload?.error === "string" && payload.error
+        ? payload.error
+        : "Create an account to keep using AI guidance and save this guest session."
+    );
+    setGuestUpgradeOpen(true);
+  };
+
   return (
     <>
       {pageLoadingState && pageLoadingState === "loading" ? (
-        <div className="loading-indicator">
-          <img src={loadingGif} alt="loader" />
+        <div className="page-loader-shell">
+          <div className="loading-indicator">
+            <img src={loadingGif} alt="loader" />
+          </div>
         </div>
       ) : pageLoadingState === "error" ? (
-        <div className="loading-indicator">
-          <div>Unable to load tasks.</div>
+        <div className="page-loader-shell">
+          <div className="loading-indicator">
+            <div>Unable to load tasks.</div>
+          </div>
         </div>
       ) : (
         <>
           {auth.user?.isGuest && (
             <div className="guest-banner">
-              Guest mode: you can use AI guidance up to {auth.user.aiRequestLimit || 3} times.
-              Create an account to save your progress permanently.
+              <span>
+                Guest mode: you can use AI guidance up to {auth.user.aiRequestLimit || 3} times.
+                Create an account to save your progress permanently.
+              </span>
+              <button type="button" onClick={() => openGuestUpgrade()}>
+                Sign Up
+              </button>
             </div>
           )}
           <div className="task-form">
@@ -190,10 +218,16 @@ const Tasks = () => {
                     toggleCompleted={toggleCompleted}
                     deleteTodo={() => handleDelete(_id)}
                     updateTaskTitle={updateTaskTitle}
+                    onGuestLimitReached={openGuestUpgrade}
                   />
                 );
               })}
           </div>
+          <GuestUpgradeModal
+            isOpen={isGuestUpgradeOpen}
+            onClose={() => setGuestUpgradeOpen(false)}
+            message={guestUpgradeMessage}
+          />
         </>
       )}
     </>
