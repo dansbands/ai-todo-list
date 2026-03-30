@@ -182,3 +182,10 @@ export const postExistingUser = async (formValues) => {
   const data = await axios.post(url, formValues, getConfig());
   return data;
 };
+
+export const createGuestSession = async () => {
+  const url = getUrl("/api/guest-session");
+
+  const data = await axios.post(url, {}, getConfig());
+  return data;
+};

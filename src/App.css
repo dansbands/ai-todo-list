@@ -543,6 +543,16 @@ button {
   }
 }
 
+.guest-banner {
+  border: 1px solid var(--secondary);
+  background: var(--background-secondary);
+  border-radius: 12px;
+  padding: 12px;
+  margin-bottom: 14px;
+  text-align: left;
+  color: var(--primary-text);
+}
+
 .task-input-error {
   color: var(--primaryDark);
   text-align: left;

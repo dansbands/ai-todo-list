@@ -2,6 +2,7 @@ const express = require("express");
 const cors = require("cors");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
+const crypto = require("crypto");
 const auth = require("./middleware/auth");
 const { ObjectId, getCollections } = require("./lib/db");
 const {
@@ -17,6 +18,7 @@ const {
 } = require("./services/aiService");
 
 const app = express();
+const GUEST_AI_REQUEST_LIMIT = 3;
 
 const isDev = process.env.NODE_ENV === "development";
 const corsOptions = {
@@ -46,6 +48,17 @@ app.get(routePaths("/health"), (req, res) => {
 });
 
 app.get(routePaths("/user"), auth, async (req, res) => {
+  if (req.user.isGuest) {
+    return res.status(200).send({
+      _id: req.user._id,
+      firstName: "Guest",
+      lastName: "User",
+      email: "guest@local",
+      isGuest: true,
+      aiRequestLimit: GUEST_AI_REQUEST_LIMIT,
+    });
+  }
+
   if (!ObjectId.isValid(req.user._id)) {
     return res.status(401).send({ error: "Invalid token payload" });
   }
@@ -141,6 +154,29 @@ app.post(routePaths("/signin"), async (req, res) => {
   }
 });
 
+app.post(routePaths("/guest-session"), async (req, res) => {
+  try {
+    const guestId = `guest_${crypto.randomUUID()}`;
+    const token = jwt.sign(
+      { _id: guestId, isGuest: true },
+      process.env.JWT_PRIVATE_KEY
+    );
+
+    return res.status(201).send({
+      token,
+      _id: guestId,
+      firstName: "Guest",
+      lastName: "User",
+      email: "guest@local",
+      isGuest: true,
+      aiRequestLimit: GUEST_AI_REQUEST_LIMIT,
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).send({ error: "Unable to create guest session" });
+  }
+});
+
 app.post(routePaths("/user/todos"), auth, async (req, res) => {
   if (isPlainObject(req.body) && Object.keys(req.body).length > 0) {
     return res
@@ -187,6 +223,7 @@ app.post(routePaths("/todos"), auth, async (req, res) => {
       title: req.body.title.trim(),
       completed: req.body.completed,
       userId: req.user._id,
+      ownerType: req.user.isGuest ? "guest" : "user",
     };
 
     const result = await todoCollection.insertOne(todo);
@@ -326,7 +363,24 @@ app.post(routePaths("/chat"), auth, async (req, res) => {
   }
 
   try {
-    const { todoCollection } = await getCollections();
+    const { todoCollection, usersCollection } = await getCollections();
+
+    if (req.user.isGuest) {
+      const usageRecord = await usersCollection.findOne({ _id: req.user._id });
+      const requestsUsed = Number.isInteger(usageRecord?.guestAiRequestsUsed)
+        ? usageRecord.guestAiRequestsUsed
+        : 0;
+
+      if (requestsUsed >= GUEST_AI_REQUEST_LIMIT) {
+        return res.status(403).json({
+          error:
+            "Guest limit reached. Please sign up to continue using AI guidance.",
+          code: "GUEST_LIMIT_REACHED",
+          limit: GUEST_AI_REQUEST_LIMIT,
+        });
+      }
+    }
+
     const todo = await todoCollection.findOne(
       getTodoFilter(todoId, req.user._id)
     );
@@ -345,6 +399,37 @@ app.post(routePaths("/chat"), auth, async (req, res) => {
         response: guidance,
       },
     });
+
+    if (req.user.isGuest) {
+      await usersCollection.updateOne(
+        { _id: req.user._id },
+        { $inc: { guestAiRequestsUsed: 1 } },
+        { upsert: true }
+      );
+
+      const updatedUsageRecord = await usersCollection.findOne({
+        _id: req.user._id,
+      });
+
+      const requestsUsed = Number.isInteger(
+        updatedUsageRecord?.guestAiRequestsUsed
+      )
+        ? updatedUsageRecord.guestAiRequestsUsed
+        : 1;
+      const requestsRemaining = Math.max(
+        GUEST_AI_REQUEST_LIMIT - requestsUsed,
+        0
+      );
+
+      return res.status(200).json({
+        ...guidance,
+        guestUsage: {
+          limit: GUEST_AI_REQUEST_LIMIT,
+          used: requestsUsed,
+          remaining: requestsRemaining,
+        },
+      });
+    }
 
     return res.status(200).json(guidance);
   } catch (error) {
