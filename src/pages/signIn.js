@@ -1,23 +1,16 @@
 import React, { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, Navigate, useNavigate } from "react-router-dom";
 import Input from "./input";
-import {
-  createGuestSession,
-  getApp,
-  getRequestErrorMessage,
-  postExistingUser,
-} from "../util/fetch";
+import { getApp, getRequestErrorMessage, postExistingUser } from "../util/fetch";
 import { useAuth } from "../components/auth";
 
-// @TODO: revisit and fix after testing behavior in production
 const SignIn = () => {
   const [, setPageLoadingState] = useState(null);
-  const [showSignUp, setShowSignUp] = useState(false);
+  const [showSignInForm, setShowSignInForm] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isGuestSubmitting, setIsGuestSubmitting] = useState(false);
   const [inputValue, setInputValue] = useState({
-    email: "guest@guest.com",
-    password: "abc123",
+    email: "",
+    password: "",
   });
   const [authError, setAuthError] = useState("");
   const [inputError, setInputError] = useState({
@@ -57,91 +50,82 @@ const SignIn = () => {
     }
   };
 
-  const handleContinueAsGuest = async () => {
-    setAuthError("");
-    setIsGuestSubmitting(true);
-
-    await createGuestSession()
-      .then((res) => {
-        auth.signIn(res.data, () => navigate("/"));
-      })
-      .catch((err) =>
-        setAuthError(getRequestErrorMessage(err, "Error creating guest session"))
-      )
-      .finally(() => setIsGuestSubmitting(false));
-  };
-
   return (
-    <div className="sign-up-container">
-      <div className={showSignUp ? "sign-up-left" : "sign-up-intro"}></div>
-      <div className="sign-up-right">
-        {showSignUp ? (
-          <div className="sign-up-form">
-            <div className="form-title">Sign In</div>
-            <Input
-              name="email"
-              title="Email"
-              inputValue={inputValue?.email}
-              inputError={inputError?.email}
-              setInputValue={setInputValue}
-              setInputError={setInputError}
-              handleSubmit={handleSubmit}
-            />
-            <Input
-              name="password"
-              title="Password"
-              inputValue={inputValue?.password}
-              inputError={inputError?.password}
-              setInputValue={setInputValue}
-              setInputError={setInputError}
-              handleSubmit={handleSubmit}
-            />
-            {authError && <div className="auth-error">{authError}</div>}
-            <button
-              type="submit"
-              onClick={handleSubmit}
-              disabled={isSubmitting}
-              className={isSubmitting ? "auth-submit-button is-loading" : "auth-submit-button"}
-            >
-              {isSubmitting ? (
-                <>
-                  <span className="button-spinner" aria-hidden="true"></span>
-                  <span>Signing In...</span>
-                </>
-              ) : (
-                "Sign In"
-              )}
-            </button>
-            <button
-              type="button"
-              onClick={handleContinueAsGuest}
-              disabled={isGuestSubmitting}
-              className={isGuestSubmitting ? "auth-submit-button is-loading" : "auth-submit-button"}
-            >
-              {isGuestSubmitting ? (
-                <>
-                  <span className="button-spinner" aria-hidden="true"></span>
-                  <span>Starting guest session...</span>
-                </>
-              ) : (
-                "Continue as Guest"
-              )}
-            </button>
-            <div className="sign-up-links">
-              <Link to="/sign-up">Sign Up instead</Link>
+    <>
+      {auth.user ? <Navigate to="/" replace /> : null}
+      <div className="sign-up-container">
+        <div className={showSignInForm ? "sign-up-left" : "sign-up-intro"}></div>
+        <div className="sign-up-right">
+          {showSignInForm ? (
+            <div className="sign-up-form">
+              <div className="form-title-block">
+                <div className="form-title">Welcome back</div>
+                <div className="form-subtitle">Pick up where you left off.</div>
+              </div>
+              <Input
+                name="email"
+                title="Email"
+                inputValue={inputValue?.email}
+                inputError={inputError?.email}
+                setInputValue={setInputValue}
+                setInputError={setInputError}
+                handleSubmit={handleSubmit}
+              />
+              <Input
+                name="password"
+                title="Password"
+                inputValue={inputValue?.password}
+                inputError={inputError?.password}
+                setInputValue={setInputValue}
+                setInputError={setInputError}
+                handleSubmit={handleSubmit}
+              />
+              {authError && <div className="auth-error">{authError}</div>}
+              <button
+                type="submit"
+                onClick={handleSubmit}
+                disabled={isSubmitting}
+                className={isSubmitting ? "auth-submit-button is-loading" : "auth-submit-button"}
+              >
+                {isSubmitting ? (
+                  <>
+                    <span className="button-spinner" aria-hidden="true"></span>
+                    <span>Signing In...</span>
+                  </>
+                ) : (
+                  "Sign In"
+                )}
+              </button>
+              <div className="sign-up-links">
+                <Link to="/sign-up">Need an account? Sign Up</Link>
+                <button
+                  type="button"
+                  className="text-link-button"
+                  onClick={() => setShowSignInForm(false)}
+                >
+                  Back to splash
+                </button>
+              </div>
             </div>
-          </div>
-        ) : (
-          <div className="help-container">
-            <div>Does life feel like this lately?</div>
-            <div>You need help!</div>
-            <button className="get-started" onClick={() => setShowSignUp(true)}>
-              Get Started!
-            </button>
-          </div>
-        )}
+          ) : (
+            <div className="help-container">
+              <div>Does life feel like this lately?</div>
+              <div>You need help!</div>
+              <button className="get-started" onClick={() => navigate("/sign-up")}>
+                Get Started!
+              </button>
+              <button
+                type="button"
+                className="get-started get-started-secondary"
+                onClick={() => setShowSignInForm(true)}
+              >
+                Sign In
+              </button>
+            </div>
+          )}
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 

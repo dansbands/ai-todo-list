@@ -7,7 +7,13 @@ import {
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Chat from "./chat";
 
-const Task = ({ data, toggleCompleted, deleteTodo, updateTaskTitle }) => {
+const Task = ({
+  data,
+  toggleCompleted,
+  deleteTodo,
+  updateTaskTitle,
+  onGuestLimitReached,
+}) => {
   const [isPanelOpen, setPanelOpen] = useState(false);
   const [swipeOffset, setSwipeOffset] = useState(0);
   const [startX, setStartX] = useState(null);
@@ -122,7 +128,12 @@ const Task = ({ data, toggleCompleted, deleteTodo, updateTaskTitle }) => {
         </div>
       </div>
       <div className={`task-panel ${isPanelOpen ? "open" : "closed"}`}>
-        <Chat title={title} todoId={_id} chatResponse={response} />
+        <Chat
+          title={title}
+          todoId={_id}
+          chatResponse={response}
+          onGuestLimitReached={onGuestLimitReached}
+        />
       </div>
       <button
         className="task-delete-button"

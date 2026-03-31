@@ -169,10 +169,11 @@ export const deleteTodo = async (id) => {
   return getDeleteResponse(message.data);
 };
 
-export const postNewUser = async (formValues) => {
-  const url = getUrl("/api/signup");
+export const postNewUser = async (formValues, options = {}) => {
+  const url = getUrl(options.includeAuth ? "/api/upgrade-guest" : "/api/signup");
+  const config = getConfig(Boolean(options.includeAuth));
 
-  const data = await axios.post(url, formValues, getConfig());
+  const data = await axios.post(url, formValues, config);
   return data;
 };
 

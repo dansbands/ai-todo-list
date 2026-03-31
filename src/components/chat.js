@@ -52,7 +52,7 @@ const normalizeChatResponse = (response) => {
   };
 };
 
-const Chat = ({ title, todoId, chatResponse }) => {
+const Chat = ({ title, todoId, chatResponse, onGuestLimitReached }) => {
   const chatContent = normalizeChatResponse(chatResponse);
 
   const [message, setMessage] = useState("");
@@ -82,6 +82,13 @@ const Chat = ({ title, todoId, chatResponse }) => {
       setMessage("");
     } catch (error) {
       console.error("Error sending chat message:", error);
+      if (
+        error?.response?.data?.code === "GUEST_LIMIT_REACHED" &&
+        typeof onGuestLimitReached === "function"
+      ) {
+        onGuestLimitReached(error.response.data);
+      }
+
       const errorMessage = getRequestErrorMessage(
         error,
         "The AI response could not be loaded right now. Please try again."

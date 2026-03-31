@@ -33,6 +33,70 @@ const getTodoFilter = (todoId, userId) => ({
   userId,
 });
 
+const getOptionalUserFromAuthorization = (req) => {
+  const authorizationHeader = req.get("authorization");
+
+  if (!authorizationHeader) {
+    return null;
+  }
+
+  const [scheme, token] = authorizationHeader.trim().split(/\s+/);
+
+  if (scheme !== "Bearer" || !token) {
+    return null;
+  }
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_PRIVATE_KEY);
+
+    if (!decoded || !decoded._id) {
+      return null;
+    }
+
+    return {
+      ...decoded,
+      _id: String(decoded._id),
+    };
+  } catch (error) {
+    return null;
+  }
+};
+
+const createRegisteredUser = async ({ usersCollection, userPayload }) => {
+  let user = await usersCollection.findOne({ email: userPayload.email });
+
+  if (user) {
+    return { error: "User already registered" };
+  }
+
+  user = {
+    ...userPayload,
+    password: await bcrypt.hash(userPayload.password, 10),
+  };
+
+  const result = await usersCollection.insertOne(user);
+  const userId = String(result.insertedId);
+  const token = jwt.sign({ _id: userId }, process.env.JWT_PRIVATE_KEY);
+
+  return {
+    user,
+    userId,
+    token,
+  };
+};
+
+const migrateGuestTodosToUser = async ({ todoCollection, guestUserId, userId }) => {
+  await todoCollection.updateMany(
+    { userId: guestUserId },
+    {
+      $set: {
+        userId,
+        ownerType: "user",
+      },
+    }
+  );
+};
+
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(cors(corsOptions));
@@ -87,21 +151,28 @@ app.get(routePaths("/user"), auth, async (req, res) => {
 
 app.post(routePaths("/signup"), async (req, res) => {
   try {
-    const { usersCollection } = await getCollections();
-    let user = await usersCollection.findOne({ email: req.body.email });
+    const { todoCollection, usersCollection } = await getCollections();
+    const guestUser = getOptionalUserFromAuthorization(req);
+    const result = await createRegisteredUser({
+      usersCollection,
+      userPayload: req.body,
+    });
 
-    if (user) {
-      return res.status(400).send({ error: "User already registered" });
+    if (result.error) {
+      return res.status(400).send({ error: result.error });
     }
 
-    user = {
-      ...req.body,
-      password: await bcrypt.hash(req.body.password, 10),
-    };
+    const { user, userId, token } = result;
 
-    const result = await usersCollection.insertOne(user);
-    const userId = String(result.insertedId);
-    const token = jwt.sign({ _id: userId }, process.env.JWT_PRIVATE_KEY);
+    if (guestUser?.isGuest) {
+      await migrateGuestTodosToUser({
+        todoCollection,
+        guestUserId: guestUser._id,
+        userId,
+      });
+
+      await usersCollection.deleteOne({ _id: guestUser._id });
+    }
 
     return res.header("Authorization", `Bearer ${token}`).status(201).send({
       token,
@@ -113,6 +184,45 @@ app.post(routePaths("/signup"), async (req, res) => {
   } catch (error) {
     console.error(error);
     return res.status(500).send({ error: "Unable to sign up user" });
+  }
+});
+
+app.post(routePaths("/upgrade-guest"), auth, async (req, res) => {
+  if (!req.user.isGuest) {
+    return res.status(400).send({ error: "Only guest sessions can be upgraded" });
+  }
+
+  try {
+    const { todoCollection, usersCollection } = await getCollections();
+    const result = await createRegisteredUser({
+      usersCollection,
+      userPayload: req.body,
+    });
+
+    if (result.error) {
+      return res.status(400).send({ error: result.error });
+    }
+
+    const { user, userId, token } = result;
+
+    await migrateGuestTodosToUser({
+      todoCollection,
+      guestUserId: req.user._id,
+      userId,
+    });
+
+    await usersCollection.deleteOne({ _id: req.user._id });
+
+    return res.header("Authorization", `Bearer ${token}`).status(201).send({
+      token,
+      _id: userId,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      email: user.email,
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).send({ error: "Unable to upgrade guest user" });
   }
 });
 

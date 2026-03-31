@@ -1,6 +1,7 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faRightToBracket, faUser } from "@fortawesome/free-solid-svg-icons";
-import { Link, useNavigate } from "react-router-dom";
+import { faArrowRightFromBracket, faUser } from "@fortawesome/free-solid-svg-icons";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "./auth";
 import LogoLight from "../img/logo-light.jpeg";
 import LogoDark from "../img/logo-dark.jpeg";
@@ -8,6 +9,8 @@ import LogoDark from "../img/logo-dark.jpeg";
 const Header = ({ isLight }) => {
   const auth = useAuth();
   const navigate = useNavigate();
+  const [isHoveringUser, setIsHoveringUser] = useState(false);
+  const userLabel = auth.user?.firstName || auth.user?.email || "Account";
 
   return (
     <>
@@ -19,23 +22,20 @@ const Header = ({ isLight }) => {
         </div>
         <div className="App-header-right">
           {auth.user ? (
-            <Link className="App-login" to="/sign-in">
-              <button
-                className="App-user"
-                onClick={() => {
-                  auth.signOut(() => navigate("/sign-in"));
-                }}
-              >
-                <FontAwesomeIcon icon={faUser} />
-                {auth.user.firstName}
-              </button>
-            </Link>
-          ) : (
-            <Link className="App-login" to="/sign-in">
-              <FontAwesomeIcon icon={faRightToBracket} />
-              Log In
-            </Link>
-          )}
+            <button
+              className={`App-user ${isHoveringUser ? "is-logging-out" : ""}`}
+              onClick={() => {
+                auth.signOut(() => navigate("/sign-in"));
+              }}
+              onMouseEnter={() => setIsHoveringUser(true)}
+              onMouseLeave={() => setIsHoveringUser(false)}
+              onFocus={() => setIsHoveringUser(true)}
+              onBlur={() => setIsHoveringUser(false)}
+            >
+              <FontAwesomeIcon icon={isHoveringUser ? faArrowRightFromBracket : faUser} />
+              {isHoveringUser ? "Log Out" : userLabel}
+            </button>
+          ) : null}
         </div>
       </header>
       <p style={{ fontSize: "10px" }}>v.1.3</p>

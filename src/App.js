@@ -1,4 +1,4 @@
-import "./App.css";
+import "./Reminders.css";
 import { Routes, Route } from "react-router-dom";
 
 import Layout from "./components/layout";
