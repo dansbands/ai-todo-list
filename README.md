@@ -1,18 +1,130 @@
-# ai-todo-list
-Todo list enhanced with AI to help you complete tasks and achieve goals
+# AI Todo List
 
-[Project Roadmap](https://github.com/users/dansbands/projects/1)
+Turn tasks into **actionable plans with real next steps**—not just another checklist.
 
-[Live App](https://dansbands.github.io/ai-todo-list/#/sign-in)
+## Overview
 
+AI Todo List is a lightweight productivity app that uses AI to **help users complete tasks**, not just track them.
 
-## Development
+Instead of manually breaking down work, users enter a task and receive a structured response that includes:
+- A clear message explaining what to do
+- Relevant links to get started
+- A prebuilt Google search to continue exploration
 
-### Getting Started
+This shifts the app from passive task tracking → **active task execution**.
 
-1. [Clone this repo](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository) to your local machine
-2. Open two terminal windows and run the following commands to start the Server and the Client:
+---
 
-   - Client: `npm start`
+## How It Works
 
-   - Server: `npm run dev`
+1. User enters a task  
+2. The app sends a prompt to an AI model  
+3. The AI returns a **structured JSON response**:
+   - `message` — actionable guidance
+   - `links` — curated resources
+   - `search` — optimized query string  
+4. The UI renders this into a usable workflow
+
+The key idea: **constrain AI output into predictable structure**, then build UX around it.
+
+---
+
+## Example Output
+
+~~~json
+{
+  "message": "Start by researching beginner bodyweight routines...",
+  "links": [
+    "https://example.com/workout-guide",
+    "https://example.com/home-fitness"
+  ],
+  "search": "beginner bodyweight workout plan at home"
+}
+~~~
+
+---
+
+## Key Features
+
+- AI-assisted task breakdown  
+- Structured JSON responses (not freeform text)  
+- Direct links to relevant resources  
+- One-click Google search handoff  
+- Simple, fast UI focused on execution  
+
+---
+
+## Why This Exists
+
+Most todo apps optimize for **organization**.
+
+This project explores a different angle:
+
+> What if a todo app helped you *actually do the thing*?
+
+By combining AI with structured outputs, this app reduces:
+- decision fatigue  
+- context switching  
+- “where do I start?” friction  
+
+---
+
+## Tech Stack
+
+- Frontend: HTML, CSS, JavaScript  
+- AI: OpenAI API  
+- Hosting: Render  
+- Database: MongoDB Atlas  
+
+---
+
+## Architecture Notes
+
+- AI responses are constrained into a **predictable JSON schema**  
+- Frontend is responsible for rendering structured data, not parsing prose  
+- Clear separation between:
+  - input (user task)  
+  - processing (AI prompt + response)  
+  - presentation (UI components)  
+
+This keeps the system simple and extensible.
+
+---
+
+## Getting Started
+
+~~~bash
+git clone https://github.com/dansbands/ai-todo-list.git
+cd ai-todo-list
+npm install
+npm start
+~~~
+
+Create a `.env` file with:
+
+~~~env
+OPENAI_API_KEY=your_api_key_here
+~~~
+
+---
+
+## Live Demo
+
+https://dansbands.github.io/ai-todo-list/
+
+---
+
+## Future Improvements
+
+- Persistent task history  
+- User accounts and saved sessions  
+- Better prompt tuning for higher-quality outputs  
+- Task prioritization and scheduling  
+- Notification system (email / push)  
+- Mobile-friendly redesign  
+
+---
+
+## License
+
+MIT
