@@ -21,6 +21,20 @@ const isSafeHttpUrl = (value) => {
   }
 };
 
+const looksLikeStructuredOutput = (value) => {
+  if (typeof value !== "string") {
+    return false;
+  }
+
+  const trimmedValue = value.trim();
+
+  return (
+    trimmedValue.startsWith("{") ||
+    trimmedValue.startsWith("[") ||
+    /"message"\s*:|"links"\s*:|"steps"\s*:/.test(trimmedValue)
+  );
+};
+
 const getFallbackGuidance = ({ todoTitle = "", userMessage = "", rawContent = "" } = {}) => ({
   message:
     typeof rawContent === "string" && rawContent.trim()
@@ -104,6 +118,44 @@ const normalizeGuidance = (payload, context = {}) => {
   };
 };
 
+const verifyUrlExists = async (url) => {
+  if (!isSafeHttpUrl(url)) {
+    return false;
+  }
+
+  try {
+    const response = await axios.get(url, {
+      timeout: 4000,
+      maxRedirects: 5,
+      validateStatus: (status) => status >= 200 && status < 400,
+    });
+
+    return response.status >= 200 && response.status < 400;
+  } catch (error) {
+    return false;
+  }
+};
+
+const verifyGuidanceLinks = async (guidance) => {
+  if (!isPlainObject(guidance) || !Array.isArray(guidance.links) || !guidance.links.length) {
+    return guidance;
+  }
+
+  const verificationResults = await Promise.all(
+    guidance.links.map(async (link) => ({
+      link,
+      isVerified: await verifyUrlExists(link.url),
+    }))
+  );
+
+  return {
+    ...guidance,
+    links: verificationResults
+      .filter((result) => result.isVerified)
+      .map((result) => result.link),
+  };
+};
+
 const parseModelContent = (content, context) => {
   if (!content || typeof content !== "string") {
     return getFallbackGuidance(context);
@@ -130,6 +182,10 @@ const parseModelContent = (content, context) => {
         }
       );
     } catch (parseError) {
+      if (looksLikeStructuredOutput(normalizedContent)) {
+        return getFallbackGuidance(context);
+      }
+
       return getFallbackGuidance({
         ...context,
         rawContent: normalizedContent,
@@ -152,6 +208,10 @@ const buildPrompt = ({ todoTitle = "", userMessage = "" }) => {
     "Return only valid JSON with this exact shape:",
     '{"message":"string","links":[{"linkTitle":"string","url":"string","description":"string"}],"googleSearch":"string","steps":["string"]}',
     "Do not include markdown code fences, comments, or trailing commas.",
+    "Only include links you are highly confident are real, directly relevant, and publicly accessible.",
+    "Prefer official product documentation or established documentation sources.",
+    "Never invent URLs, domains, slugs, or pages. If you are not sure a link is real, return an empty links array.",
+    "Do not confuse similarly named products, languages, or concepts. If the task is ambiguous, explain the ambiguity briefly and use googleSearch instead of guessing links.",
     "Keep links relevant and steps actionable.",
   ].join(" ");
 };
@@ -202,10 +262,12 @@ const getGuidance = async ({ todoTitle = "", userMessage = "" }) => {
 
     const content = response.data?.choices?.[0]?.message?.content;
 
-    return parseModelContent(content, {
+    const guidance = parseModelContent(content, {
       todoTitle,
       userMessage,
     });
+
+    return verifyGuidanceLinks(guidance);
   } catch (error) {
     console.error("AI guidance request failed:", getAiErrorMessage(error));
 
@@ -220,4 +282,5 @@ module.exports = {
   normalizeGuidance,
   parseModelContent,
   getFallbackGuidance,
+  looksLikeStructuredOutput,
 };

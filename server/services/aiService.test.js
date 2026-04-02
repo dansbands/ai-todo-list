@@ -8,6 +8,7 @@ const {
   getGuidance,
   normalizeGuidance,
   parseModelContent,
+  looksLikeStructuredOutput,
 } = require("./aiService");
 
 test("buildPrompt includes task title and exact response schema", () => {
@@ -22,6 +23,8 @@ test("buildPrompt includes task title and exact response schema", () => {
     prompt,
     /"steps":\["string"\]/
   );
+  assert.match(prompt, /Never invent URLs/);
+  assert.match(prompt, /Do not confuse similarly named products/);
 });
 
 test("normalizeGuidance returns the expected schema for partial payloads", () => {
@@ -111,6 +114,30 @@ test("parseModelContent falls back safely for invalid model output", () => {
     googleSearch: "replace bike tire",
     steps: [],
   });
+});
+
+test("parseModelContent does not leak broken json-like output into the fallback message", () => {
+  const guidance = parseModelContent(
+    '{"message":"Start here","links":[{"linkTitle":"Broken",json "url":"https://example.com"}]}',
+    {
+      todoTitle: "learn cursor",
+      userMessage: "",
+    }
+  );
+
+  assert.deepEqual(guidance, {
+    message:
+      "Guidance could not be generated in the expected format. Please try again.",
+    links: [],
+    googleSearch: "learn cursor",
+    steps: [],
+  });
+});
+
+test("looksLikeStructuredOutput detects broken json-like content", () => {
+  assert.equal(looksLikeStructuredOutput('{"message":"hello"}'), true);
+  assert.equal(looksLikeStructuredOutput('"message": "hello"'), true);
+  assert.equal(looksLikeStructuredOutput("Start with the docs"), false);
 });
 
 test("getFallbackGuidance prefers todo title for google search", () => {
