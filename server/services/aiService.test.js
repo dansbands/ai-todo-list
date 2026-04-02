@@ -6,8 +6,10 @@ const {
   buildPrompt,
   getFallbackGuidance,
   getGuidance,
+  isSafeHttpUrl,
   normalizeGuidance,
   parseModelContent,
+  looksLikeStructuredOutput,
 } = require("./aiService");
 
 test("buildPrompt includes task title and exact response schema", () => {
@@ -22,6 +24,8 @@ test("buildPrompt includes task title and exact response schema", () => {
     prompt,
     /"steps":\["string"\]/
   );
+  assert.match(prompt, /Never invent URLs/);
+  assert.match(prompt, /Do not confuse similarly named products/);
 });
 
 test("normalizeGuidance returns the expected schema for partial payloads", () => {
@@ -85,6 +89,14 @@ test("normalizeGuidance drops unsafe link protocols", () => {
   ]);
 });
 
+test("isSafeHttpUrl rejects localhost and private network destinations", () => {
+  assert.equal(isSafeHttpUrl("http://localhost:3000/docs"), false);
+  assert.equal(isSafeHttpUrl("http://127.0.0.1/metadata"), false);
+  assert.equal(isSafeHttpUrl("http://169.254.169.254/latest/meta-data"), false);
+  assert.equal(isSafeHttpUrl("https://192.168.1.10/internal"), false);
+  assert.equal(isSafeHttpUrl("https://example.com/docs"), true);
+});
+
 test("parseModelContent strips code fences and trailing commas", () => {
   const guidance = parseModelContent(
     '```json\n{"message":"Do this","links":[],"googleSearch":"test","steps":["one",],}\n```',
@@ -111,6 +123,30 @@ test("parseModelContent falls back safely for invalid model output", () => {
     googleSearch: "replace bike tire",
     steps: [],
   });
+});
+
+test("parseModelContent does not leak broken json-like output into the fallback message", () => {
+  const guidance = parseModelContent(
+    '{"message":"Start here","links":[{"linkTitle":"Broken",json "url":"https://example.com"}]}',
+    {
+      todoTitle: "learn cursor",
+      userMessage: "",
+    }
+  );
+
+  assert.deepEqual(guidance, {
+    message:
+      "Guidance could not be generated in the expected format. Please try again.",
+    links: [],
+    googleSearch: "learn cursor",
+    steps: [],
+  });
+});
+
+test("looksLikeStructuredOutput detects broken json-like content", () => {
+  assert.equal(looksLikeStructuredOutput('{"message":"hello"}'), true);
+  assert.equal(looksLikeStructuredOutput('"message": "hello"'), true);
+  assert.equal(looksLikeStructuredOutput("Start with the docs"), false);
 });
 
 test("getFallbackGuidance prefers todo title for google search", () => {

@@ -126,6 +126,7 @@ const Chat = ({ title, todoId, chatResponse, onGuestLimitReached }) => {
       </ol>
     ) : null;
 
+  const hasLinks = Array.isArray(response?.links) && response.links.length > 0;
   const googleLink = response.googleSearch
     ? `https://www.google.com/search?q=${encodeURIComponent(response.googleSearch)}`
     : null;
@@ -159,10 +160,12 @@ const Chat = ({ title, todoId, chatResponse, onGuestLimitReached }) => {
                 {renderSteps()}
               </div>
             )}
-            <div className="chat-section">
-              <h3>🔗 Resources</h3>
-              {renderLinks()}
-            </div>
+            {hasLinks && (
+              <div className="chat-section">
+                <h3>🔗 Resources</h3>
+                {renderLinks()}
+              </div>
+            )}
 
             {googleLink && (
               <div className="chat-section">
