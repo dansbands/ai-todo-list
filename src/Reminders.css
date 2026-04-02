@@ -30,11 +30,13 @@ body {
   margin: 0;
   font-family: var(--font-body);
   color: var(--text-primary);
+  background-color: #f4f4f0;
   background:
     radial-gradient(circle at top left, rgba(255, 186, 145, 0.35), transparent 28%),
     radial-gradient(circle at top right, rgba(255, 221, 171, 0.55), transparent 26%),
     linear-gradient(180deg, #faf8f2 0%, #f1efe9 46%, #eceae3 100%);
   min-height: 100vh;
+  min-height: 100dvh;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -59,10 +61,19 @@ body.dark-mode {
   --shadow-sm: 0 8px 22px rgba(0, 0, 0, 0.22);
   --header-fade-start: rgba(11, 14, 18, 0.96);
   --header-fade-mid: rgba(11, 14, 18, 0.72);
+  background-color: #101317;
   background:
     radial-gradient(circle at top left, rgba(255, 122, 69, 0.18), transparent 30%),
     radial-gradient(circle at top right, rgba(255, 202, 149, 0.12), transparent 26%),
     linear-gradient(180deg, #14181d 0%, #101317 100%);
+}
+
+html {
+  background-color: #f4f4f0;
+}
+
+html.dark-mode {
+  background-color: #101317;
 }
 
 * {
@@ -81,12 +92,17 @@ input {
 #root,
 .App {
   min-height: 100vh;
+  min-height: 100dvh;
 }
 
 .App {
   width: min(100%, 1180px);
   margin: 0 auto;
-  padding: 28px 22px 48px;
+  padding:
+    calc(28px + env(safe-area-inset-top))
+    22px
+    calc(48px + env(safe-area-inset-bottom))
+    22px;
   position: relative;
 }
 
@@ -637,6 +653,12 @@ body.dark-mode .help-container {
   cursor: pointer;
 }
 
+.task-swipe-shell {
+  position: relative;
+  overflow: hidden;
+  border-radius: 24px;
+}
+
 .task-container {
   position: relative;
   border-radius: 24px;
@@ -765,13 +787,24 @@ body.dark-mode .help-container {
 
 .task-delete-button {
   position: absolute;
-  top: 12px;
-  right: 12px;
-  width: 52px;
-  height: 52px;
+  top: 50%;
+  right: 10px;
+  width: 72px;
+  min-width: 72px;
+  height: 54px;
   padding: 0;
   background: linear-gradient(180deg, #e56d62, #d14f45);
-  z-index: 2;
+  border-radius: 20px;
+  z-index: 0;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-50%);
+  transition: opacity 160ms ease;
+}
+
+.task-swipe-shell.is-revealed .task-delete-button {
+  opacity: 1;
+  pointer-events: auto;
 }
 
 .chat-form,
@@ -856,10 +889,16 @@ body.dark-mode .help-container {
   z-index: 8;
   display: grid;
   place-items: center;
-  padding: 20px;
+  padding:
+    calc(20px + env(safe-area-inset-top))
+    20px
+    calc(20px + env(safe-area-inset-bottom))
+    20px;
   background: rgba(18, 22, 30, 0.5);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
 }
 
 .auth-modal {
@@ -875,6 +914,8 @@ body.dark-mode .help-container {
     var(--bg-canvas);
   border: 1px solid var(--surface-stroke);
   box-shadow: var(--shadow-lg);
+  max-height: calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 40px);
+  overflow: auto;
 }
 
 .auth-modal-copy {
@@ -1003,7 +1044,11 @@ body.dark-mode .help-container {
 
 @media (max-width: 640px) {
   .App {
-    padding: 14px 10px 36px;
+    padding:
+      calc(14px + env(safe-area-inset-top))
+      10px
+      calc(36px + env(safe-area-inset-bottom))
+      10px;
   }
 
   .App-header {
@@ -1074,6 +1119,8 @@ body.dark-mode .help-container {
   .auth-modal {
     padding: 16px;
     border-radius: 24px;
+    width: 100%;
+    max-height: calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 20px);
   }
 
   .auth-modal-copy,
@@ -1098,16 +1145,23 @@ body.dark-mode .help-container {
   }
 
   .task-row {
-    align-items: flex-start;
+    align-items: center;
   }
 
   .task-button-container {
-    flex-direction: column;
+    flex-direction: row;
+  }
+
+  .task-controls-button {
+    display: none;
   }
 
   .task-delete-button {
-    width: 48px;
-    height: 48px;
+    top: 50%;
+    right: 8px;
+    width: 68px;
+    min-width: 68px;
+    height: 52px;
   }
 
   .color-mode-switch {

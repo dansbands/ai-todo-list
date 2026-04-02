@@ -7,6 +7,9 @@ import {
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Chat from "./chat";
 
+const DELETE_REVEAL_WIDTH = 92;
+const DELETE_REVEAL_THRESHOLD = DELETE_REVEAL_WIDTH / 2;
+
 const Task = ({
   data,
   toggleCompleted,
@@ -23,11 +26,14 @@ const Task = ({
   const { title, completed, _id, response } = data;
 
   const handleTogglePanel = () => {
+    setSwipeOffset(0);
     setPanelOpen((prevState) => !prevState);
   };
 
   const handleToggleControls = () => {
-    setSwipeOffset(swipeOffset === 0 ? -100 : 0);
+    setSwipeOffset((prevState) =>
+      prevState === 0 ? -DELETE_REVEAL_WIDTH : 0
+    );
   };
 
   const handleTouchStart = (e) => {
@@ -40,7 +46,7 @@ const Task = ({
       const offset = currentX - startX;
 
       if (offset < 0) {
-        setSwipeOffset(Math.max(offset, -100)); 
+        setSwipeOffset(Math.max(offset, -DELETE_REVEAL_WIDTH));
       } else {
         setSwipeOffset(Math.min(offset, 0));
       }
@@ -48,8 +54,8 @@ const Task = ({
   };
 
   const handleTouchEnd = () => {
-    if (swipeOffset < -50) {
-      setSwipeOffset(-100); 
+    if (swipeOffset < -DELETE_REVEAL_THRESHOLD) {
+      setSwipeOffset(-DELETE_REVEAL_WIDTH);
     } else {
       setSwipeOffset(0);
     }
@@ -78,70 +84,74 @@ const Task = ({
   };
 
   return (
-    <div
-      className="task-container"
-      style={{ transform: `translateX(${swipeOffset}px)` }}
-      onTouchStart={handleTouchStart}
-      onTouchMove={handleTouchMove}
-      onTouchEnd={handleTouchEnd}
-    >
-      <div className="task-row">
-        <div className="task-row-left">
-          <label className="task-checkbox-container">
-            <input
-              type="checkbox"
-              checked={completed}
-              onChange={() => toggleCompleted(_id)}
-            />
-            <div className="task-checkmark"></div>
-          </label>
-          <div className="task-title">
-            {isEditing ? (
-              <input
-                type="text"
-                value={editedTitle}
-                onChange={handleInputChange}
-                onBlur={handleTitleSave}
-                onKeyDown={handleKeyPress}
-                autoFocus
-              />
-            ) : (
-              <span onClick={handleTitleClick}>{title}</span>
-            )}
-          </div>
-        </div>
-        <div className="task-button-container">
-          <button
-            className="task-controls-button"
-            onClick={handleToggleControls}
-          >
-            <FontAwesomeIcon icon={faEllipsis} />
-          </button>
-          <button
-            className={`task-toggle-button ${
-              isPanelOpen ? "rotate-90-right" : ""
-            }`}
-            onClick={handleTogglePanel}
-          >
-            <FontAwesomeIcon icon={faChevronRight} />
-          </button>
-        </div>
-      </div>
-      <div className={`task-panel ${isPanelOpen ? "open" : "closed"}`}>
-        <Chat
-          title={title}
-          todoId={_id}
-          chatResponse={response}
-          onGuestLimitReached={onGuestLimitReached}
-        />
-      </div>
+    <div className={`task-swipe-shell ${swipeOffset < 0 ? "is-revealed" : ""}`}>
       <button
         className="task-delete-button"
         onClick={() => deleteTodo(_id)}
-        style={{ display: swipeOffset === -100 ? "flex" : "none" }}
+        aria-label={`Delete ${title}`}
       >
         <FontAwesomeIcon icon={faTrash} />
       </button>
+      <div
+        className="task-container"
+        style={{ transform: `translateX(${swipeOffset}px)` }}
+      >
+        <div
+          className="task-row"
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
+        >
+          <div className="task-row-left">
+            <label className="task-checkbox-container">
+              <input
+                type="checkbox"
+                checked={completed}
+                onChange={() => toggleCompleted(_id)}
+              />
+              <div className="task-checkmark"></div>
+            </label>
+            <div className="task-title">
+              {isEditing ? (
+                <input
+                  type="text"
+                  value={editedTitle}
+                  onChange={handleInputChange}
+                  onBlur={handleTitleSave}
+                  onKeyDown={handleKeyPress}
+                  autoFocus
+                />
+              ) : (
+                <span onClick={handleTitleClick}>{title}</span>
+              )}
+            </div>
+          </div>
+          <div className="task-button-container">
+            <button
+              className="task-controls-button"
+              onClick={handleToggleControls}
+            >
+              <FontAwesomeIcon icon={faEllipsis} />
+            </button>
+            <button
+              className={`task-toggle-button ${
+                isPanelOpen ? "rotate-90-right" : ""
+              }`}
+              onClick={handleTogglePanel}
+            >
+              <FontAwesomeIcon icon={faChevronRight} />
+            </button>
+          </div>
+        </div>
+        <div className={`task-panel ${isPanelOpen ? "open" : "closed"}`}>
+          <Chat
+            title={title}
+            todoId={_id}
+            chatResponse={response}
+            onGuestLimitReached={onGuestLimitReached}
+          />
+        </div>
+      </div>
     </div>
   );
 };
