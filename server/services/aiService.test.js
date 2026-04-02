@@ -6,6 +6,7 @@ const {
   buildPrompt,
   getFallbackGuidance,
   getGuidance,
+  isSafeHttpUrl,
   normalizeGuidance,
   parseModelContent,
   looksLikeStructuredOutput,
@@ -86,6 +87,14 @@ test("normalizeGuidance drops unsafe link protocols", () => {
       description: "Allowed",
     },
   ]);
+});
+
+test("isSafeHttpUrl rejects localhost and private network destinations", () => {
+  assert.equal(isSafeHttpUrl("http://localhost:3000/docs"), false);
+  assert.equal(isSafeHttpUrl("http://127.0.0.1/metadata"), false);
+  assert.equal(isSafeHttpUrl("http://169.254.169.254/latest/meta-data"), false);
+  assert.equal(isSafeHttpUrl("https://192.168.1.10/internal"), false);
+  assert.equal(isSafeHttpUrl("https://example.com/docs"), true);
 });
 
 test("parseModelContent strips code fences and trailing commas", () => {

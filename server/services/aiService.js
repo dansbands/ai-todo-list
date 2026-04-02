@@ -1,4 +1,6 @@
 const axios = require("axios");
+const dns = require("node:dns").promises;
+const net = require("node:net");
 
 const DEFAULT_GUIDANCE_MESSAGE =
   "Guidance could not be generated in the expected format. Please try again.";
@@ -15,7 +17,109 @@ const isSafeHttpUrl = (value) => {
 
   try {
     const parsedUrl = new URL(value.trim());
-    return parsedUrl.protocol === "http:" || parsedUrl.protocol === "https:";
+    if (parsedUrl.protocol !== "http:" && parsedUrl.protocol !== "https:") {
+      return false;
+    }
+
+    const hostname = parsedUrl.hostname.toLowerCase();
+    if (!hostname || hostname === "localhost" || hostname.endsWith(".localhost")) {
+      return false;
+    }
+
+    if (isPrivateOrLocalIp(hostname)) {
+      return false;
+    }
+
+    return true;
+  } catch (error) {
+    return false;
+  }
+};
+
+const ipv4ToLong = (ip) =>
+  ip.split(".").reduce((accumulator, segment) => accumulator * 256 + Number(segment), 0);
+
+const isPrivateIpv4 = (ip) => {
+  const normalizedIp = ip.trim();
+  const ipAsLong = ipv4ToLong(normalizedIp);
+  const rangeStart = (value) => ipv4ToLong(value.split("/")[0]);
+  const rangeMask = (cidr) => Number(cidr.split("/")[1]);
+  const inRange = (cidr) => {
+    const mask = rangeMask(cidr);
+    const shift = 32 - mask;
+    return (ipAsLong >>> shift) === (rangeStart(cidr) >>> shift);
+  };
+
+  return [
+    "0.0.0.0/8",
+    "10.0.0.0/8",
+    "100.64.0.0/10",
+    "127.0.0.0/8",
+    "169.254.0.0/16",
+    "172.16.0.0/12",
+    "192.0.0.0/24",
+    "192.0.2.0/24",
+    "192.168.0.0/16",
+    "198.18.0.0/15",
+    "198.51.100.0/24",
+    "203.0.113.0/24",
+    "224.0.0.0/4",
+    "240.0.0.0/4",
+  ].some(inRange);
+};
+
+const isPrivateIpv6 = (ip) => {
+  const normalizedIp = ip.toLowerCase();
+
+  if (normalizedIp === "::" || normalizedIp === "::1") {
+    return true;
+  }
+
+  if (normalizedIp.startsWith("fc") || normalizedIp.startsWith("fd")) {
+    return true;
+  }
+
+  if (normalizedIp.startsWith("fe8") || normalizedIp.startsWith("fe9")) {
+    return true;
+  }
+
+  if (normalizedIp.startsWith("fea") || normalizedIp.startsWith("feb")) {
+    return true;
+  }
+
+  if (normalizedIp.startsWith("ff")) {
+    return true;
+  }
+
+  if (normalizedIp.startsWith("::ffff:")) {
+    const mappedIpv4 = normalizedIp.slice(7);
+    return net.isIP(mappedIpv4) === 4 && isPrivateIpv4(mappedIpv4);
+  }
+
+  return false;
+};
+
+const isPrivateOrLocalIp = (host) => {
+  const ipVersion = net.isIP(host);
+  if (ipVersion === 4) {
+    return isPrivateIpv4(host);
+  }
+
+  if (ipVersion === 6) {
+    return isPrivateIpv6(host);
+  }
+
+  return false;
+};
+
+const resolvesToPublicIp = async (hostname) => {
+  try {
+    const dnsResults = await dns.lookup(hostname, { all: true, verbatim: true });
+    if (!dnsResults.length) {
+      return false;
+    }
+
+    return dnsResults.every((result) => !isPrivateOrLocalIp(result.address));
   } catch (error) {
     return false;
   }
@@ -124,9 +228,15 @@ const verifyUrlExists = async (url) => {
   }
 
   try {
+    const parsedUrl = new URL(url);
+    const isPublicHost = await resolvesToPublicIp(parsedUrl.hostname);
+    if (!isPublicHost) {
+      return false;
+    }
+
     const response = await axios.get(url, {
       timeout: 4000,
-      maxRedirects: 5,
+      maxRedirects: 0,
       validateStatus: (status) => status >= 200 && status < 400,
     });
 
@@ -283,4 +393,5 @@ module.exports = {
   parseModelContent,
   getFallbackGuidance,
   looksLikeStructuredOutput,
+  isSafeHttpUrl,
 };
