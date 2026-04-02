@@ -2,17 +2,19 @@ import React, { useState } from "react";
 import { getStoredValue } from "../util/fetch";
 
 export const AuthContext = React.createContext(null);
+const noop = () => {};
+
 const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(() => getStoredValue("user"));
 
-  const signIn = (newUser, callback) => {
+  const signIn = (newUser, callback = noop) => {
     setUser(newUser);
     localStorage.setItem("user", JSON.stringify(newUser));
     localStorage.setItem("token", newUser.token);
     callback();
   };
 
-  const signOut = (callback) => {
+  const signOut = (callback = noop) => {
     setUser(null);
     localStorage.removeItem("user");
     localStorage.removeItem("token");

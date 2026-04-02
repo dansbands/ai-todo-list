@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
-import { getAuthHeaders, getRequestErrorMessage, serverUrl } from "../util/fetch";
+import {
+  getRequestErrorMessage,
+  postChatMessage,
+} from "../util/fetch";
 
 const getFallbackChatResponse = (content = "") => ({
   message: typeof content === "string" ? content : "",
@@ -58,6 +60,7 @@ const Chat = ({ title, todoId, chatResponse, onGuestLimitReached }) => {
   const [message, setMessage] = useState("");
   const [response, setResponse] = useState(chatContent || {});
   const [loading, setLoading] = useState(false);
+  const [requestError, setRequestError] = useState("");
 
   useEffect(() => {
     setResponse(normalizeChatResponse(chatResponse));
@@ -65,20 +68,15 @@ const Chat = ({ title, todoId, chatResponse, onGuestLimitReached }) => {
 
   const sendMessage = async () => {
     setLoading(true);
+    setRequestError("");
 
     try {
-      const result = await axios.post(
-        `${serverUrl}/api/chat`,
-        {
-          todoId,
-          ...(message.trim() ? { message } : {}),
-        },
-        {
-          headers: getAuthHeaders(),
-        }
-      );
+      const result = await postChatMessage({
+        todoId,
+        message,
+      });
 
-      setResponse(normalizeChatResponse(result.data));
+      setResponse(normalizeChatResponse(result));
       setMessage("");
     } catch (error) {
       console.error("Error sending chat message:", error);
@@ -93,10 +91,12 @@ const Chat = ({ title, todoId, chatResponse, onGuestLimitReached }) => {
         error,
         "The AI response could not be loaded right now. Please try again."
       );
-      setResponse(
-        getFallbackChatResponse(
-          errorMessage
-        )
+      setRequestError(errorMessage);
+
+      setResponse((currentResponse) =>
+        currentResponse?.message
+          ? currentResponse
+          : getFallbackChatResponse(errorMessage)
       );
     } finally {
       setLoading(false);
@@ -142,7 +142,7 @@ const Chat = ({ title, todoId, chatResponse, onGuestLimitReached }) => {
             placeholder="Type your message"
           />
         )}
-        <button className="chat-button" onClick={sendMessage}>
+        <button className="chat-button" onClick={sendMessage} disabled={loading}>
           <div className="chat-sparkles">{"\u2728"}</div>
           <div>{loading ? "loading..." : "AI Assistant"}</div>
         </button>
@@ -150,6 +150,7 @@ const Chat = ({ title, todoId, chatResponse, onGuestLimitReached }) => {
       {response.message && (
         <div className="chat-response">
           <>
+            {requestError && <div className="auth-error">{requestError}</div>}
             <div className="chat-section">
               <h3>🧠 Plan</h3>
               <div>{response.message}</div>
