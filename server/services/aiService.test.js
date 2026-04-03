@@ -95,6 +95,28 @@ test("normalizeGuidance safely normalizes legacy raw response payloads", () => {
   });
 });
 
+test("normalizeGuidance preserves legacy OpenAI choices content", () => {
+  const guidance = normalizeGuidance(
+    {
+      choices: [
+        {
+          message: {
+            content: "Use your saved checklist and update due dates.",
+          },
+        },
+      ],
+    },
+    { todoTitle: "plan week" }
+  );
+
+  assert.deepEqual(guidance, {
+    message: "Use your saved checklist and update due dates.",
+    links: [],
+    googleSearch: "plan week",
+    steps: ["Use your saved checklist and update due dates."],
+  });
+});
+
 test("normalizeGuidance drops unsafe link protocols", () => {
   const guidance = normalizeGuidance({
     message: "Use a trusted resource.",
