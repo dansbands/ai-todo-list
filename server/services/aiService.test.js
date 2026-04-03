@@ -63,6 +63,60 @@ test("normalizeGuidance returns the expected schema for partial payloads", () =>
   });
 });
 
+test("normalizeGuidance safely normalizes legacy raw response payloads", () => {
+  const guidance = normalizeGuidance(
+    {
+      message: "Use the official docs first.",
+      links: [
+        {
+          linkTitle: "Docs",
+          url: "https://example.com/docs",
+          description: "Official docs",
+        },
+      ],
+      googleSearch: "learn docs",
+      steps: ["Open the docs", "Follow the quickstart"],
+      generatedAt: "2026-04-03T10:00:00.000Z",
+    },
+    { todoTitle: "learn docs" }
+  );
+
+  assert.deepEqual(guidance, {
+    message: "Use the official docs first.",
+    links: [
+      {
+        linkTitle: "Docs",
+        url: "https://example.com/docs",
+        description: "Official docs",
+      },
+    ],
+    googleSearch: "learn docs",
+    steps: ["Open the docs", "Follow the quickstart"],
+  });
+});
+
+test("normalizeGuidance preserves legacy OpenAI choices content", () => {
+  const guidance = normalizeGuidance(
+    {
+      choices: [
+        {
+          message: {
+            content: "Use your saved checklist and update due dates.",
+          },
+        },
+      ],
+    },
+    { todoTitle: "plan week" }
+  );
+
+  assert.deepEqual(guidance, {
+    message: "Use your saved checklist and update due dates.",
+    links: [],
+    googleSearch: "plan week",
+    steps: ["Use your saved checklist and update due dates."],
+  });
+});
+
 test("normalizeGuidance drops unsafe link protocols", () => {
   const guidance = normalizeGuidance({
     message: "Use a trusted resource.",

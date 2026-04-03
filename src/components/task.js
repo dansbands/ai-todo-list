@@ -23,7 +23,7 @@ const Task = ({
   const [isEditing, setIsEditing] = useState(false);
   const [editedTitle, setEditedTitle] = useState(data.title);
 
-  const { title, completed, _id, response } = data;
+  const { title, completed, _id, assistantGuidance, response } = data;
 
   const handleTogglePanel = () => {
     setSwipeOffset(0);
@@ -147,7 +147,7 @@ const Task = ({
           <Chat
             title={title}
             todoId={_id}
-            chatResponse={response}
+            chatResponse={assistantGuidance || response}
             onGuestLimitReached={onGuestLimitReached}
           />
         </div>
