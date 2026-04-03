@@ -1,5 +1,7 @@
 import axios from "axios";
 
+export const AUTH_EXPIRED_EVENT = "app:auth-expired";
+
 const normalizeBaseUrl = (value) =>
   typeof value === "string" ? value.trim().replace(/\/+$/, "") : "";
 
@@ -54,6 +56,23 @@ export const getRequestErrorMessage = (error, fallbackMessage) => {
   return fallbackMessage;
 };
 
+const notifyAuthExpired = (error) => {
+  if (error?.response?.status !== 401 || typeof window === "undefined") {
+    return;
+  }
+
+  window.dispatchEvent(
+    new CustomEvent(AUTH_EXPIRED_EVENT, {
+      detail: {
+        message: getRequestErrorMessage(
+          error,
+          "Your session has expired. Please sign in again."
+        ),
+      },
+    })
+  );
+};
+
 export const getAuthHeaders = () => {
   const token = getStoredValue("token");
 
@@ -68,6 +87,17 @@ export const getAuthHeaders = () => {
 const getConfig = (withAuth = false) => ({
   headers: withAuth ? getAuthHeaders() : baseHeaders,
 });
+
+const request = async (config, options = {}) => {
+  try {
+    return await axios(config);
+  } catch (error) {
+    if (options.withAuth) {
+      notifyAuthExpired(error);
+    }
+    throw error;
+  }
+};
 
 const appUrl = getUrl("/api/health");
 const todosUrl = getUrl("/api/todos");
@@ -106,58 +136,72 @@ const getDeleteResponse = (data) => {
 };
 
 export const getApp = async () => {
-  const message = await axios.get(appUrl, {
+  const message = await request({
+    method: "get",
+    url: appUrl,
     headers: baseHeaders,
   });
   return message.data;
 };
 
 export const getUserTodos = async () => {
-  const message = await axios.post(userTodosUrl, {}, getConfig(true));
+  const message = await request({
+    method: "post",
+    url: userTodosUrl,
+    data: {},
+    ...getConfig(true),
+  }, { withAuth: true });
   return getTodosFromResponse(message.data);
 };
 
 export const getTodos = async () => {
-  const message = await axios.get(todosUrl, getConfig(true));
+  const message = await request({
+    method: "get",
+    url: todosUrl,
+    ...getConfig(true),
+  }, { withAuth: true });
   return getTodosFromResponse(message.data);
 };
 
 export const postTodo = async (todo) => {
-  const message = await axios.post(
-    todosUrl,
-    {
+  const message = await request({
+    method: "post",
+    url: todosUrl,
+    data: {
       title: todo.title,
       completed: todo.completed,
     },
-    getConfig(true)
-  );
+    ...getConfig(true),
+  }, { withAuth: true });
 
   return getTodoFromResponse(message.data);
 };
 
 export const updateTodo = async (todo) => {
   const editUrl = `${todosUrl}/${todo._id}/edit`;
-  const message = await axios.put(
-    editUrl,
-    {
+  const message = await request({
+    method: "put",
+    url: editUrl,
+    data: {
       title: todo.title,
       completed: todo.completed,
     },
-    getConfig(true)
-  );
+    ...getConfig(true),
+  }, { withAuth: true });
 
   return getTodoFromResponse(message.data);
 };
 
 export const completeTodo = async (todo) => {
   const completeUrl = `${todosUrl}/${todo._id}/complete`;
-  const message = await axios.put(
-    completeUrl,
-    {
+  const message = await request({
+    method: "put",
+    url: completeUrl,
+    data: {
       completed: todo.completed,
     },
-    getConfig(true)
-  );
+    ...getConfig(true),
+  }, { withAuth: true });
 
   return getTodoFromResponse(message.data);
 };
@@ -165,7 +209,11 @@ export const completeTodo = async (todo) => {
 export const deleteTodo = async (id) => {
   const url = getUrl(`/api/todos/${id}`);
 
-  const message = await axios.delete(url, getConfig(true));
+  const message = await request({
+    method: "delete",
+    url,
+    ...getConfig(true),
+  }, { withAuth: true });
   return getDeleteResponse(message.data);
 };
 
@@ -173,20 +221,53 @@ export const postNewUser = async (formValues, options = {}) => {
   const url = getUrl(options.includeAuth ? "/api/upgrade-guest" : "/api/signup");
   const config = getConfig(Boolean(options.includeAuth));
 
-  const data = await axios.post(url, formValues, config);
+  const data = await request({
+    method: "post",
+    url,
+    data: formValues,
+    ...config,
+  }, { withAuth: Boolean(options.includeAuth) });
   return data;
 };
 
 export const postExistingUser = async (formValues) => {
   const url = getUrl("/api/signin");
 
-  const data = await axios.post(url, formValues, getConfig());
+  const data = await request({
+    method: "post",
+    url,
+    data: formValues,
+    ...getConfig(),
+  });
   return data;
 };
 
 export const createGuestSession = async () => {
   const url = getUrl("/api/guest-session");
 
-  const data = await axios.post(url, {}, getConfig());
+  const data = await request({
+    method: "post",
+    url,
+    data: {},
+    ...getConfig(),
+  });
   return data;
+};
+
+export const postChatMessage = async ({ todoId, message = "" }) => {
+  const url = getUrl("/api/chat");
+
+  const result = await request({
+    method: "post",
+    url,
+    data: {
+      todoId,
+      ...(typeof message === "string" && message.trim()
+        ? { message: message.trim() }
+        : {}),
+    },
+    ...getConfig(true),
+  }, { withAuth: true });
+
+  return result.data;
 };
