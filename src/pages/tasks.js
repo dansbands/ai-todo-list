@@ -5,6 +5,7 @@ import Task from "../components/task";
 import {
   completeTodo,
   deleteTodo,
+  getRequestErrorMessage,
   getUserTodos,
   postTodo,
   updateTodo,
@@ -19,6 +20,8 @@ const Tasks = () => {
   const [allTasks, setAllTasks] = useState([]);
   const [inputValue, setInputValue] = useState({ taskName: "" });
   const [inputError, setInputError] = useState({ taskName: false });
+  const [taskMutationError, setTaskMutationError] = useState("");
+  const [isCreatingTask, setIsCreatingTask] = useState(false);
   const [isGuestUpgradeOpen, setGuestUpgradeOpen] = useState(false);
   const [guestUpgradeMessage, setGuestUpgradeMessage] = useState("");
   const auth = useAuth();
@@ -36,6 +39,7 @@ const Tasks = () => {
     if (!auth.user?._id) {
       setAllTasks([]);
       setPageLoadingState("complete");
+      setTaskMutationError("");
       return () => {
         isActive = false;
       };
@@ -52,6 +56,7 @@ const Tasks = () => {
         }
 
         setAllTasks(todos);
+        setTaskMutationError("");
         setPageLoadingState("complete");
       } catch (error) {
         console.error("Error loading todos:", error);
@@ -80,6 +85,9 @@ const Tasks = () => {
     };
 
     if (trimmedTaskName) {
+      setTaskMutationError("");
+      setIsCreatingTask(true);
+
       try {
         const createdTodo = await postTodo(newTask);
         setAllTasks((prevState) => [createdTodo, ...prevState]);
@@ -87,6 +95,11 @@ const Tasks = () => {
         setInputError({ taskName: false });
       } catch (error) {
         console.error("Error creating todo:", error);
+        setTaskMutationError(
+          getRequestErrorMessage(error, "Unable to create the task right now.")
+        );
+      } finally {
+        setIsCreatingTask(false);
       }
     } else {
       setInputError({ taskName: true });
@@ -100,6 +113,7 @@ const Tasks = () => {
     }
 
     try {
+      setTaskMutationError("");
       const updatedTodo = await completeTodo({
         _id: foundItm._id,
         completed: !foundItm.completed,
@@ -110,6 +124,9 @@ const Tasks = () => {
       );
     } catch (error) {
       console.error("Error updating todo completion:", error);
+      setTaskMutationError(
+        getRequestErrorMessage(error, "Unable to update the task right now.")
+      );
     }
   };
 
@@ -121,12 +138,16 @@ const Tasks = () => {
 
   const handleDelete = async (taskId) => {
     try {
+      setTaskMutationError("");
       const result = await deleteTodo(taskId);
       setAllTasks((prevState) =>
         prevState.filter((task) => task._id !== result.deletedId)
       );
     } catch (error) {
       console.error("Error deleting todo:", error);
+      setTaskMutationError(
+        getRequestErrorMessage(error, "Unable to delete the task right now.")
+      );
     }
   };
 
@@ -137,6 +158,7 @@ const Tasks = () => {
     }
 
     try {
+      setTaskMutationError("");
       const updatedTodo = await updateTodo({
         _id: taskToUpdate._id,
         title: newTitle,
@@ -148,6 +170,9 @@ const Tasks = () => {
       );
     } catch (error) {
       console.error("Error updating todo title:", error);
+      setTaskMutationError(
+        getRequestErrorMessage(error, "Unable to rename the task right now.")
+      );
     }
   };
 
@@ -188,6 +213,9 @@ const Tasks = () => {
             </div>
           )}
           <div className="task-form">
+            {taskMutationError && (
+              <div className="auth-error">{taskMutationError}</div>
+            )}
             <div className="task-form-left">
               <Input
                 name="taskName"
@@ -200,8 +228,16 @@ const Tasks = () => {
               />
             </div>
             <div className="task-form-right">
-              <button type="submit" onClick={handleSubmit}>
-                <FontAwesomeIcon icon={faPlus} />
+              <button
+                type="submit"
+                onClick={handleSubmit}
+                disabled={isCreatingTask}
+              >
+                {isCreatingTask ? (
+                  <span className="button-spinner" aria-hidden="true"></span>
+                ) : (
+                  <FontAwesomeIcon icon={faPlus} />
+                )}
               </button>
             </div>
           </div>

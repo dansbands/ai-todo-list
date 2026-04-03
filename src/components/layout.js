@@ -2,10 +2,15 @@ import { useEffect, useState } from "react";
 import Header from "./header";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faMoon, faSun } from "@fortawesome/free-solid-svg-icons";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "./auth";
+import { AUTH_EXPIRED_EVENT } from "../util/fetch";
 
 const Layout = ({ children }) => {
   const [isLight, setIsLight] = useState(true);
   const modeIcon = isLight ? faSun : faMoon;
+  const navigate = useNavigate();
+  const auth = useAuth();
   
   const getCurrentTheme = () =>
     window.matchMedia("(prefers-color-scheme: light)");
@@ -30,6 +35,17 @@ const Layout = ({ children }) => {
     }
   }, [isLight]);
 
+  useEffect(() => {
+    const handleAuthExpired = () => {
+      auth.signOut(() => navigate("/sign-in", { replace: true }));
+    };
+
+    window.addEventListener(AUTH_EXPIRED_EVENT, handleAuthExpired);
+
+    return () => {
+      window.removeEventListener(AUTH_EXPIRED_EVENT, handleAuthExpired);
+    };
+  }, [auth, navigate]);
 
   return (
     <div className="App">

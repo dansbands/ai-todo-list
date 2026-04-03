@@ -607,6 +607,11 @@ body.dark-mode .help-container {
   -webkit-backdrop-filter: blur(18px);
 }
 
+.task-form > .auth-error {
+  grid-column: 1 / -1;
+  margin: 0;
+}
+
 .task-form-left,
 .task-form-right {
   width: auto;
