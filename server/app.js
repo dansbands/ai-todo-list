@@ -15,6 +15,7 @@ const {
 const {
   AiServiceUnavailableError,
   getGuidance,
+  normalizeGuidance,
 } = require("./services/aiService");
 
 const app = express();
@@ -32,6 +33,57 @@ const getTodoFilter = (todoId, userId) => ({
   _id: new ObjectId(todoId),
   userId,
 });
+
+const toIsoStringOrNull = (value) => {
+  if (!value) {
+    return null;
+  }
+
+  if (value instanceof Date) {
+    return value.toISOString();
+  }
+
+  const parsedValue = new Date(value);
+  return Number.isNaN(parsedValue.getTime()) ? null : parsedValue.toISOString();
+};
+
+const getAssistantGuidanceFromTodo = (todo) => {
+  if (!todo || typeof todo !== "object") {
+    return null;
+  }
+
+  const storedGuidance =
+    todo.assistantGuidance && typeof todo.assistantGuidance === "object"
+      ? todo.assistantGuidance
+      : todo.response;
+
+  if (!storedGuidance || typeof storedGuidance !== "object") {
+    return null;
+  }
+
+  const normalizedGuidance = normalizeGuidance(storedGuidance, {
+    todoTitle: typeof todo.title === "string" ? todo.title : "",
+  });
+
+  return {
+    ...normalizedGuidance,
+    generatedAt:
+      toIsoStringOrNull(todo.assistantGuidance?.generatedAt) ||
+      toIsoStringOrNull(todo.updatedAt) ||
+      toIsoStringOrNull(todo.createdAt),
+  };
+};
+
+const serializeTodo = (todo) => {
+  if (!todo || typeof todo !== "object") {
+    return todo;
+  }
+
+  return {
+    ...todo,
+    assistantGuidance: getAssistantGuidanceFromTodo(todo),
+  };
+};
 
 const getOptionalUserFromAuthorization = (req) => {
   const authorizationHeader = req.get("authorization");
@@ -300,7 +352,7 @@ app.post(routePaths("/user/todos"), auth, async (req, res) => {
       .find({ userId: req.user._id })
       .sort({ _id: -1 })
       .toArray();
-    return res.status(200).json({ todos });
+    return res.status(200).json({ todos: todos.map(serializeTodo) });
   } catch (error) {
     console.error(error);
     return res.status(500).json({ error: "Unable to fetch todos" });
@@ -314,7 +366,7 @@ app.get(routePaths("/todos"), auth, async (req, res) => {
       .find({ userId: req.user._id })
       .sort({ _id: -1 })
       .toArray();
-    return res.status(200).json({ todos });
+    return res.status(200).json({ todos: todos.map(serializeTodo) });
   } catch (error) {
     console.error(error);
     return res.status(500).json({ error: "Unable to fetch todos" });
@@ -350,7 +402,7 @@ app.post(routePaths("/todos"), auth, async (req, res) => {
       return res.status(500).json({ error: "Unable to create todo" });
     }
 
-    return res.status(201).json({ todo: createdTodo });
+    return res.status(201).json({ todo: serializeTodo(createdTodo) });
   } catch (error) {
     console.error(error);
     return res.status(500).json({ error: "Unable to create todo" });
@@ -391,7 +443,7 @@ app.put(routePaths("/todos/:id/edit"), auth, async (req, res) => {
       return res.status(500).json({ error: "Unable to update todo" });
     }
 
-    return res.status(200).json({ todo: updatedTodo });
+    return res.status(200).json({ todo: serializeTodo(updatedTodo) });
   } catch (error) {
     console.error(error);
     return res.status(500).json({ error: "Unable to update todo" });
@@ -431,7 +483,7 @@ app.put(routePaths("/todos/:id/complete"), auth, async (req, res) => {
       return res.status(500).json({ error: "Unable to update todo" });
     }
 
-    return res.status(200).json({ todo: updatedTodo });
+    return res.status(200).json({ todo: serializeTodo(updatedTodo) });
   } catch (error) {
     console.error(error);
     return res.status(500).json({ error: "Unable to update todo" });
@@ -503,10 +555,14 @@ app.post(routePaths("/chat"), auth, async (req, res) => {
       todoTitle: todo.title,
       userMessage: message,
     });
+    const assistantGuidance = {
+      ...guidance,
+      generatedAt: new Date().toISOString(),
+    };
 
     await todoCollection.updateOne(getTodoFilter(todoId, req.user._id), {
       $set: {
-        response: guidance,
+        assistantGuidance,
       },
     });
 
@@ -532,7 +588,7 @@ app.post(routePaths("/chat"), auth, async (req, res) => {
       );
 
       return res.status(200).json({
-        ...guidance,
+        ...assistantGuidance,
         guestUsage: {
           limit: GUEST_AI_REQUEST_LIMIT,
           used: requestsUsed,
@@ -541,7 +597,7 @@ app.post(routePaths("/chat"), auth, async (req, res) => {
       });
     }
 
-    return res.status(200).json(guidance);
+    return res.status(200).json(assistantGuidance);
   } catch (error) {
     if (error instanceof AiServiceUnavailableError) {
       return res.status(error.statusCode).json({ error: error.message });
