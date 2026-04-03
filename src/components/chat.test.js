@@ -1,19 +1,18 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
-import axios from "axios";
 import Chat from "./chat";
 
-jest.mock("axios");
 jest.mock("../util/fetch", () => ({
-  getAuthHeaders: jest.fn(() => ({ Authorization: "Bearer test-token" })),
   getRequestErrorMessage: jest.fn(
     () => "The AI response could not be loaded right now. Please try again."
   ),
-  serverUrl: "",
+  postChatMessage: jest.fn(),
 }));
+
+import { postChatMessage } from "../util/fetch";
 
 describe("Chat", () => {
   it("shows a friendly fallback message when the AI request fails", async () => {
-    axios.post.mockRejectedValueOnce(new Error("network down"));
+    postChatMessage.mockRejectedValueOnce(new Error("network down"));
 
     render(<Chat todoId="todo-1" chatResponse={null} />);
 
