@@ -17,15 +17,12 @@ const {
   getGuidance,
   normalizeGuidance,
 } = require("./services/aiService");
+const { createCorsOptions } = require("./config/security");
 
 const app = express();
 const GUEST_AI_REQUEST_LIMIT = 3;
-
 const isDev = process.env.NODE_ENV === "development";
-const corsOptions = {
-  origin: isDev ? true : "*",
-  optionsSuccessStatus: 201,
-};
+const corsOptions = createCorsOptions();
 
 const routePaths = (path) => [path, `/api${path}`];
 
