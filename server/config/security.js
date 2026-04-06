@@ -3,6 +3,8 @@ const DEFAULT_DEVELOPMENT_ORIGINS = [
   "http://127.0.0.1:3000",
 ];
 
+const normalizeOrigin = (origin) => origin.replace(/\/+$/, "");
+
 const parseAllowedOrigins = (value) => {
   if (typeof value !== "string") {
     return [];
@@ -10,7 +12,7 @@ const parseAllowedOrigins = (value) => {
 
   return value
     .split(",")
-    .map((origin) => origin.trim())
+    .map((origin) => normalizeOrigin(origin.trim()))
     .filter(Boolean);
 };
 
@@ -19,12 +21,13 @@ const getAllowedOrigins = ({
   allowedOrigins = process.env.CORS_ALLOWED_ORIGINS,
 } = {}) => {
   const configuredOrigins = parseAllowedOrigins(allowedOrigins);
+  const runtimeEnvironment = nodeEnv || "development";
 
   if (configuredOrigins.length > 0) {
     return configuredOrigins;
   }
 
-  return nodeEnv === "development" ? DEFAULT_DEVELOPMENT_ORIGINS : [];
+  return runtimeEnvironment === "development" ? DEFAULT_DEVELOPMENT_ORIGINS : [];
 };
 
 const createCorsOriginHandler = (allowedOrigins) => (origin, callback) => {

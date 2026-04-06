@@ -8,7 +8,7 @@ const {
 describe("security config", () => {
   it("parses comma-separated origins", () => {
     expect(
-      parseAllowedOrigins(" https://app.example.com, http://localhost:3000 , ")
+      parseAllowedOrigins(" https://app.example.com/, http://localhost:3000/ , ")
     ).toEqual(["https://app.example.com", "http://localhost:3000"]);
   });
 
@@ -20,6 +20,17 @@ describe("security config", () => {
 
   it("requires explicit origins outside development", () => {
     expect(getAllowedOrigins({ nodeEnv: "production" })).toEqual([]);
+  });
+
+  it("defaults to development origins when nodeEnv is unset", () => {
+    const originalNodeEnv = process.env.NODE_ENV;
+    delete process.env.NODE_ENV;
+
+    try {
+      expect(getAllowedOrigins()).toEqual(DEFAULT_DEVELOPMENT_ORIGINS);
+    } finally {
+      process.env.NODE_ENV = originalNodeEnv;
+    }
   });
 
   it("prefers configured origins over defaults", () => {
