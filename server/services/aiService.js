@@ -198,12 +198,29 @@ const normalizeSteps = (steps, message) => {
   return [];
 };
 
+const getLegacyChoiceMessage = (payload) => {
+  if (!Array.isArray(payload.choices) || !payload.choices.length) {
+    return "";
+  }
+
+  const firstChoice = payload.choices[0];
+  if (!isPlainObject(firstChoice) || !isPlainObject(firstChoice.message)) {
+    return "";
+  }
+
+  return typeof firstChoice.message.content === "string"
+    ? firstChoice.message.content.trim()
+    : "";
+};
+
 const normalizeGuidance = (payload, context = {}) => {
   if (!isPlainObject(payload)) {
     return getFallbackGuidance(context);
   }
 
-  const message = typeof payload.message === "string" ? payload.message.trim() : "";
+  const message =
+    (typeof payload.message === "string" ? payload.message.trim() : "") ||
+    getLegacyChoiceMessage(payload);
   const links = Array.isArray(payload.links)
     ? payload.links.map(normalizeLink).filter(Boolean)
     : [];
