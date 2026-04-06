@@ -1,13 +1,16 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import Chat from "./chat";
-import { postChatMessage } from "../util/fetch";
 
 jest.mock("../util/fetch", () => ({
+  getRequestErrorMessage: jest.fn(
+    () => "The AI response could not be loaded right now. Please try again."
+  ),
   getAuthHeaders: jest.fn(() => ({ Authorization: "Bearer test-token" })),
-  getRequestErrorMessage: jest.fn(),
   postChatMessage: jest.fn(),
   serverUrl: "",
 }));
+
+import { postChatMessage } from "../util/fetch";
 
 describe("Chat", () => {
   beforeEach(() => {
