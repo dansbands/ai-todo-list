@@ -72,7 +72,18 @@ describe("security config", () => {
 
     corsOptions.origin("https://evil.example.com", callback);
 
-    expect(callback.mock.calls[0][0]).toEqual(expect.any(Error));
-    expect(callback.mock.calls[0][0].message).toBe("Not allowed by CORS");
+    expect(callback).toHaveBeenCalledWith(null, false);
+  });
+
+  it("allows requests from approved origins with a trailing slash", () => {
+    const callback = jest.fn();
+    const corsOptions = createCorsOptions({
+      nodeEnv: "production",
+      allowedOrigins: "https://app.example.com",
+    });
+
+    corsOptions.origin("https://app.example.com/", callback);
+
+    expect(callback).toHaveBeenCalledWith(null, true);
   });
 });

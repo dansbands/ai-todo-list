@@ -31,12 +31,19 @@ const getAllowedOrigins = ({
 };
 
 const createCorsOriginHandler = (allowedOrigins) => (origin, callback) => {
-  if (!origin || allowedOrigins.includes(origin)) {
+  if (!origin) {
     callback(null, true);
     return;
   }
 
-  callback(new Error("Not allowed by CORS"));
+  const normalizedOrigin = normalizeOrigin(origin);
+
+  if (allowedOrigins.includes(normalizedOrigin)) {
+    callback(null, true);
+    return;
+  }
+
+  callback(null, false);
 };
 
 const createCorsOptions = (options = {}) => {
