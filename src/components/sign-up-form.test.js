@@ -2,15 +2,23 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import SignUpForm from "./sign-up-form";
 import { AuthContext } from "./auth";
-import { createGuestSession, postNewUser } from "../util/fetch";
+import {
+  createGuestSession,
+  getRequestErrorMessage,
+  postNewUser,
+} from "../util/fetch";
 
 jest.mock("../util/fetch", () => ({
   createGuestSession: jest.fn(),
-  getRequestErrorMessage: jest.fn(() => "Unable to continue as guest"),
+  getRequestErrorMessage: jest.fn(),
   postNewUser: jest.fn(),
 }));
 
 describe("SignUpForm", () => {
+  beforeEach(() => {
+    getRequestErrorMessage.mockReturnValue("Unable to continue as guest");
+  });
+
   it("lets a user continue as guest from sign up", async () => {
     const signIn = jest.fn((user, callback) => callback());
     createGuestSession.mockResolvedValueOnce({

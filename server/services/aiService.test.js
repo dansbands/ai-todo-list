@@ -90,6 +90,28 @@ describe("aiService", () => {
     });
   });
 
+  it("normalizeGuidance preserves legacy OpenAI choices content", () => {
+    const guidance = normalizeGuidance(
+      {
+        choices: [
+          {
+            message: {
+              content: "Use your saved checklist and update due dates.",
+            },
+          },
+        ],
+      },
+      { todoTitle: "plan week" }
+    );
+
+    expect(guidance).toEqual({
+      message: "Use your saved checklist and update due dates.",
+      links: [],
+      googleSearch: "plan week",
+      steps: ["Use your saved checklist and update due dates."],
+    });
+  });
+
   it("normalizeGuidance drops unsafe link protocols", () => {
     const guidance = normalizeGuidance({
       message: "Use a trusted resource.",

@@ -93,7 +93,7 @@ describe("fetch util", () => {
       },
     });
 
-    expect(handler).toHaveBeenCalledTimes(0);
+    expect(handler).toHaveBeenCalledTimes(1);
     window.removeEventListener(AUTH_EXPIRED_EVENT, handler);
   });
 
