@@ -104,7 +104,12 @@ Create a `.env` file with:
 
 ~~~env
 OPENAI_API_KEY=your_api_key_here
+CORS_ALLOWED_ORIGINS=http://localhost:3000
+REACT_APP_SERVER_URL=http://localhost:10000
+REACT_APP_PROD_SERVER_URL=https://your-production-api.example.com
 ~~~
+
+`CORS_ALLOWED_ORIGINS` accepts a comma-separated list. In development, the server falls back to `http://localhost:3000` and `http://127.0.0.1:3000` when the variable is omitted. In production, you should set it explicitly so browser requests are only accepted from trusted frontends.
 
 ---
 

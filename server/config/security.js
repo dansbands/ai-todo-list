@@ -1,0 +1,63 @@
+const DEFAULT_DEVELOPMENT_ORIGINS = [
+  "http://localhost:3000",
+  "http://127.0.0.1:3000",
+];
+
+const normalizeOrigin = (origin) => origin.replace(/\/+$/, "");
+
+const parseAllowedOrigins = (value) => {
+  if (typeof value !== "string") {
+    return [];
+  }
+
+  return value
+    .split(",")
+    .map((origin) => normalizeOrigin(origin.trim()))
+    .filter(Boolean);
+};
+
+const getAllowedOrigins = ({
+  nodeEnv = process.env.NODE_ENV,
+  allowedOrigins = process.env.CORS_ALLOWED_ORIGINS,
+} = {}) => {
+  const configuredOrigins = parseAllowedOrigins(allowedOrigins);
+  const runtimeEnvironment = nodeEnv || "development";
+
+  if (configuredOrigins.length > 0) {
+    return configuredOrigins;
+  }
+
+  return runtimeEnvironment === "development" ? DEFAULT_DEVELOPMENT_ORIGINS : [];
+};
+
+const createCorsOriginHandler = (allowedOrigins) => (origin, callback) => {
+  if (!origin) {
+    callback(null, true);
+    return;
+  }
+
+  const normalizedOrigin = normalizeOrigin(origin);
+
+  if (allowedOrigins.includes(normalizedOrigin)) {
+    callback(null, true);
+    return;
+  }
+
+  callback(null, false);
+};
+
+const createCorsOptions = (options = {}) => {
+  const allowedOrigins = getAllowedOrigins(options);
+
+  return {
+    origin: createCorsOriginHandler(allowedOrigins),
+    optionsSuccessStatus: 200,
+  };
+};
+
+module.exports = {
+  DEFAULT_DEVELOPMENT_ORIGINS,
+  createCorsOptions,
+  getAllowedOrigins,
+  parseAllowedOrigins,
+};
