@@ -13,7 +13,9 @@ const Layout = ({ children }) => {
   const auth = useAuth();
   
   const getCurrentTheme = () =>
-    window.matchMedia("(prefers-color-scheme: light)");
+    typeof window.matchMedia === "function"
+      ? window.matchMedia("(prefers-color-scheme: light)")
+      : { matches: true };
 
   const switchColorMode = () => {
     setIsLight((prevState) => !prevState);

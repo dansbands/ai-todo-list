@@ -1,5 +1,3 @@
-import axios from "axios";
-
 export const AUTH_EXPIRED_EVENT = "app:auth-expired";
 
 const normalizeBaseUrl = (value) =>
@@ -17,6 +15,81 @@ const getUrl = (path) => `${apiBaseUrl}${path}`;
 const baseHeaders = {
   "Content-Type": "application/json",
   Accept: "application/json",
+};
+
+const getResponseHeaders = (response) => {
+  const headers = {};
+
+  if (response?.headers?.forEach) {
+    response.headers.forEach((value, key) => {
+      headers[key] = value;
+    });
+  }
+
+  return headers;
+};
+
+const parseResponseData = async (response) => {
+  if (!response) {
+    return null;
+  }
+
+  if (response.status === 204) {
+    return null;
+  }
+
+  const contentType = response.headers?.get?.("content-type") || "";
+
+  if (contentType.includes("application/json")) {
+    try {
+      return await response.json();
+    } catch (error) {
+      return null;
+    }
+  }
+
+  try {
+    return await response.text();
+  } catch (error) {
+    return null;
+  }
+};
+
+const createResponseLike = (response, data) => ({
+  status: response.status,
+  data,
+  headers: getResponseHeaders(response),
+});
+
+const createRequestError = (response, data) => {
+  const errorMessage =
+    (typeof data === "string" && data.trim()) ||
+    (data &&
+      typeof data === "object" &&
+      (typeof data.error === "string"
+        ? data.error
+        : typeof data.message === "string"
+          ? data.message
+          : "")) ||
+    response.statusText ||
+    `Request failed with status ${response.status}`;
+
+  const error = new Error(errorMessage);
+  error.response = createResponseLike(response, data);
+  return error;
+};
+
+const getRequestInit = (config = {}) => {
+  const init = {
+    method: config.method,
+    headers: config.headers,
+  };
+
+  if (Object.prototype.hasOwnProperty.call(config, "data")) {
+    init.body = JSON.stringify(config.data);
+  }
+
+  return init;
 };
 
 export const getStoredValue = (key) => {
@@ -90,11 +163,19 @@ const getConfig = (withAuth = false) => ({
 
 const request = async (config, options = {}) => {
   try {
-    return await axios(config);
-  } catch (error) {
-    if (options.withAuth) {
-      notifyAuthExpired(error);
+    const response = await fetch(config.url, getRequestInit(config));
+    const data = await parseResponseData(response);
+
+    if (!response.ok) {
+      const error = createRequestError(response, data);
+      if (options.withAuth && response.status === 401) {
+        notifyAuthExpired(error);
+      }
+      throw error;
     }
+
+    return createResponseLike(response, data);
+  } catch (error) {
     throw error;
   }
 };
@@ -145,63 +226,78 @@ export const getApp = async () => {
 };
 
 export const getUserTodos = async () => {
-  const message = await request({
-    method: "post",
-    url: userTodosUrl,
-    data: {},
-    ...getConfig(true),
-  }, { withAuth: true });
+  const message = await request(
+    {
+      method: "post",
+      url: userTodosUrl,
+      data: {},
+      ...getConfig(true),
+    },
+    { withAuth: true }
+  );
   return getTodosFromResponse(message.data);
 };
 
 export const getTodos = async () => {
-  const message = await request({
-    method: "get",
-    url: todosUrl,
-    ...getConfig(true),
-  }, { withAuth: true });
+  const message = await request(
+    {
+      method: "get",
+      url: todosUrl,
+      ...getConfig(true),
+    },
+    { withAuth: true }
+  );
   return getTodosFromResponse(message.data);
 };
 
 export const postTodo = async (todo) => {
-  const message = await request({
-    method: "post",
-    url: todosUrl,
-    data: {
-      title: todo.title,
-      completed: todo.completed,
+  const message = await request(
+    {
+      method: "post",
+      url: todosUrl,
+      data: {
+        title: todo.title,
+        completed: todo.completed,
+      },
+      ...getConfig(true),
     },
-    ...getConfig(true),
-  }, { withAuth: true });
+    { withAuth: true }
+  );
 
   return getTodoFromResponse(message.data);
 };
 
 export const updateTodo = async (todo) => {
   const editUrl = `${todosUrl}/${todo._id}/edit`;
-  const message = await request({
-    method: "put",
-    url: editUrl,
-    data: {
-      title: todo.title,
-      completed: todo.completed,
+  const message = await request(
+    {
+      method: "put",
+      url: editUrl,
+      data: {
+        title: todo.title,
+        completed: todo.completed,
+      },
+      ...getConfig(true),
     },
-    ...getConfig(true),
-  }, { withAuth: true });
+    { withAuth: true }
+  );
 
   return getTodoFromResponse(message.data);
 };
 
 export const completeTodo = async (todo) => {
   const completeUrl = `${todosUrl}/${todo._id}/complete`;
-  const message = await request({
-    method: "put",
-    url: completeUrl,
-    data: {
-      completed: todo.completed,
+  const message = await request(
+    {
+      method: "put",
+      url: completeUrl,
+      data: {
+        completed: todo.completed,
+      },
+      ...getConfig(true),
     },
-    ...getConfig(true),
-  }, { withAuth: true });
+    { withAuth: true }
+  );
 
   return getTodoFromResponse(message.data);
 };
@@ -209,11 +305,14 @@ export const completeTodo = async (todo) => {
 export const deleteTodo = async (id) => {
   const url = getUrl(`/api/todos/${id}`);
 
-  const message = await request({
-    method: "delete",
-    url,
-    ...getConfig(true),
-  }, { withAuth: true });
+  const message = await request(
+    {
+      method: "delete",
+      url,
+      ...getConfig(true),
+    },
+    { withAuth: true }
+  );
   return getDeleteResponse(message.data);
 };
 
@@ -221,12 +320,15 @@ export const postNewUser = async (formValues, options = {}) => {
   const url = getUrl(options.includeAuth ? "/api/upgrade-guest" : "/api/signup");
   const config = getConfig(Boolean(options.includeAuth));
 
-  const data = await request({
-    method: "post",
-    url,
-    data: formValues,
-    ...config,
-  }, { withAuth: Boolean(options.includeAuth) });
+  const data = await request(
+    {
+      method: "post",
+      url,
+      data: formValues,
+      ...config,
+    },
+    { withAuth: Boolean(options.includeAuth) }
+  );
   return data;
 };
 
@@ -257,17 +359,20 @@ export const createGuestSession = async () => {
 export const postChatMessage = async ({ todoId, message = "" }) => {
   const url = getUrl("/api/chat");
 
-  const result = await request({
-    method: "post",
-    url,
-    data: {
-      todoId,
-      ...(typeof message === "string" && message.trim()
-        ? { message: message.trim() }
-        : {}),
+  const result = await request(
+    {
+      method: "post",
+      url,
+      data: {
+        todoId,
+        ...(typeof message === "string" && message.trim()
+          ? { message: message.trim() }
+          : {}),
+      },
+      ...getConfig(true),
     },
-    ...getConfig(true),
-  }, { withAuth: true });
+    { withAuth: true }
+  );
 
   return result.data;
 };
