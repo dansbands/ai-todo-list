@@ -2,15 +2,19 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import SignIn from "./signIn";
 import { AuthContext } from "../components/auth";
-import { getApp, postExistingUser } from "../util/fetch";
+import { getApp, getRequestErrorMessage, postExistingUser } from "../util/fetch";
 
 jest.mock("../util/fetch", () => ({
   getApp: jest.fn(),
-  getRequestErrorMessage: jest.fn(() => "Invalid username and password combination"),
+  getRequestErrorMessage: jest.fn(),
   postExistingUser: jest.fn(),
 }));
 
 describe("SignIn", () => {
+  beforeEach(() => {
+    getRequestErrorMessage.mockReturnValue("Invalid username and password combination");
+  });
+
   it("shows an auth error for failed sign in attempts", async () => {
     getApp.mockResolvedValue("Got the app!!!");
     postExistingUser.mockRejectedValueOnce({
