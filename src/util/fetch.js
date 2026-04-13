@@ -12,6 +12,26 @@ const apiBaseUrl = normalizeBaseUrl(
 export const serverUrl = apiBaseUrl;
 
 const getUrl = (path) => `${apiBaseUrl}${path}`;
+const getRuntimeOrigin = () =>
+  typeof window === "undefined" ? "" : normalizeBaseUrl(window.location.origin);
+
+const getSameOriginRetryUrl = (url) => {
+  const runtimeOrigin = getRuntimeOrigin();
+
+  if (
+    process.env.NODE_ENV === "development" ||
+    !apiBaseUrl ||
+    !runtimeOrigin ||
+    runtimeOrigin === apiBaseUrl ||
+    typeof url !== "string" ||
+    !url.startsWith(apiBaseUrl)
+  ) {
+    return "";
+  }
+
+  return `${runtimeOrigin}${url.slice(apiBaseUrl.length)}`;
+};
+
 const baseHeaders = {
   "Content-Type": "application/json",
   Accept: "application/json",
@@ -161,21 +181,31 @@ const getConfig = (withAuth = false) => ({
   headers: withAuth ? getAuthHeaders() : baseHeaders,
 });
 
+const sendRequest = async (url, config, options = {}) => {
+  const response = await fetch(url, getRequestInit(config));
+  const data = await parseResponseData(response);
+
+  if (!response.ok) {
+    const error = createRequestError(response, data);
+    if (options.withAuth && response.status === 401) {
+      notifyAuthExpired(error);
+    }
+    throw error;
+  }
+
+  return createResponseLike(response, data);
+};
+
 const request = async (config, options = {}) => {
   try {
-    const response = await fetch(config.url, getRequestInit(config));
-    const data = await parseResponseData(response);
+    return await sendRequest(config.url, config, options);
+  } catch (error) {
+    const retryUrl = getSameOriginRetryUrl(config.url);
 
-    if (!response.ok) {
-      const error = createRequestError(response, data);
-      if (options.withAuth && response.status === 401) {
-        notifyAuthExpired(error);
-      }
-      throw error;
+    if (!error?.response && retryUrl) {
+      return sendRequest(retryUrl, config, options);
     }
 
-    return createResponseLike(response, data);
-  } catch (error) {
     throw error;
   }
 };

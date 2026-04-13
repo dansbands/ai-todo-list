@@ -5,9 +5,9 @@ import { getApp, getRequestErrorMessage, postExistingUser } from "../util/fetch"
 import { useAuth } from "../components/auth";
 
 const SignIn = () => {
-  const [, setPageLoadingState] = useState(null);
   const [showSignInForm, setShowSignInForm] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [serviceWarning, setServiceWarning] = useState("");
   const [inputValue, setInputValue] = useState({
     email: "",
     password: "",
@@ -22,10 +22,25 @@ const SignIn = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    setPageLoadingState("loading");
+    let isActive = true;
+
     getApp()
-      .then(() => setPageLoadingState("complete"))
-      .catch(() => setPageLoadingState("error"));
+      .then(() => {
+        if (isActive) {
+          setServiceWarning("");
+        }
+      })
+      .catch(() => {
+        if (isActive) {
+          setServiceWarning(
+            "The app could not confirm a server connection. You can still try signing in, but deployment API settings may need attention."
+          );
+        }
+      });
+
+    return () => {
+      isActive = false;
+    };
   }, []);
 
   const handleSubmit = async () => {
@@ -56,6 +71,7 @@ const SignIn = () => {
       <div className="sign-up-container">
         <div className={showSignInForm ? "sign-up-left" : "sign-up-intro"}></div>
         <div className="sign-up-right">
+          {serviceWarning && <div className="auth-error">{serviceWarning}</div>}
           {showSignInForm ? (
             <div className="sign-up-form">
               <div className="form-title-block">
