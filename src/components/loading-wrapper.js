@@ -1,8 +1,10 @@
-import { Navigate } from "react-router-dom";
+ "use client";
+
+import { Navigate } from "../util/router";
 import loadingGif from "../img/loading.gif";
 
 const LoadingWrapper = ({ children, pageLoadingState }) => {
-  if (localStorage.getItem("token")) {
+  if (typeof window !== "undefined" && localStorage.getItem("token")) {
     return <Navigate to="/" />;
   }
 
@@ -10,7 +12,7 @@ const LoadingWrapper = ({ children, pageLoadingState }) => {
     return (
       <div className="page-loader-shell">
         <div className="loading-indicator">
-          <img src={loadingGif} alt="loader" />
+          <img src={loadingGif.src || loadingGif} alt="loader" />
           <div>Loading...</div>
         </div>
       </div>

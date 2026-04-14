@@ -1,5 +1,4 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
-import { MemoryRouter } from "react-router-dom";
 import SignUpForm from "./sign-up-form";
 import { AuthContext } from "./auth";
 import {
@@ -12,6 +11,11 @@ jest.mock("../util/fetch", () => ({
   createGuestSession: jest.fn(),
   getRequestErrorMessage: jest.fn(),
   postNewUser: jest.fn(),
+}));
+
+jest.mock("../util/router", () => ({
+  Link: ({ children, ...props }) => <a {...props}>{children}</a>,
+  useNavigate: () => jest.fn(),
 }));
 
 describe("SignUpForm", () => {
@@ -34,9 +38,7 @@ describe("SignUpForm", () => {
 
     render(
       <AuthContext.Provider value={{ user: null, signIn }}>
-        <MemoryRouter>
-          <SignUpForm showGuestAction />
-        </MemoryRouter>
+        <SignUpForm showGuestAction />
       </AuthContext.Provider>
     );
 
@@ -44,11 +46,12 @@ describe("SignUpForm", () => {
 
     await waitFor(() => {
       expect(createGuestSession).toHaveBeenCalledTimes(1);
-      expect(signIn).toHaveBeenCalledWith(
-        expect.objectContaining({ isGuest: true }),
-        expect.any(Function)
-      );
     });
+
+    expect(signIn).toHaveBeenCalledWith(
+      expect.objectContaining({ isGuest: true }),
+      expect.any(Function)
+    );
   });
 
   it("shows an auth error when sign up fails", async () => {
@@ -58,9 +61,7 @@ describe("SignUpForm", () => {
 
     render(
       <AuthContext.Provider value={{ user: null, signIn: jest.fn() }}>
-        <MemoryRouter>
-          <SignUpForm />
-        </MemoryRouter>
+        <SignUpForm />
       </AuthContext.Provider>
     );
 

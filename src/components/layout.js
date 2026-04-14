@@ -1,14 +1,13 @@
+ "use client";
+
 import { useEffect, useState } from "react";
 import Header from "./header";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faMoon, faSun } from "@fortawesome/free-solid-svg-icons";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "../util/router";
 import { useAuth } from "./auth";
 import { AUTH_EXPIRED_EVENT } from "../util/fetch";
 
 const Layout = ({ children }) => {
   const [isLight, setIsLight] = useState(true);
-  const modeIcon = isLight ? faSun : faMoon;
   const navigate = useNavigate();
   const auth = useAuth();
   
@@ -55,7 +54,7 @@ const Layout = ({ children }) => {
       <div className="App-divider" />
       <div className="App-body">{children}</div>
       <button className="color-mode-switch" onClick={switchColorMode}>
-        <FontAwesomeIcon icon={modeIcon} />
+        {isLight ? "☀️" : "🌙"}
       </button>
     </div>
   );
