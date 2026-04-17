@@ -2,8 +2,8 @@
 
 import { useEffect } from "react";
 
-export const Link = ({ children, href, ...props }) => (
-  <a href={href} {...props}>
+export const Link = ({ children, href, to, ...props }) => (
+  <a href={href ?? to} {...props}>
     {children}
   </a>
 );
