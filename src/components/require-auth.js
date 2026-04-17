@@ -1,5 +1,7 @@
+ "use client";
+
 import { useAuth } from "./auth";
-import { Navigate, useLocation } from "react-router-dom";
+import { Navigate, useLocation } from "../util/router";
 
 const RequireAuth = ({ children }) => {
   let auth = useAuth();

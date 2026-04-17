@@ -1,10 +1,6 @@
+ "use client";
+
 import React, { useState } from "react";
-import {
-  faChevronRight,
-  faEllipsis,
-  faTrash,
-} from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Chat from "./chat";
 
 const DELETE_REVEAL_WIDTH = 92;
@@ -90,7 +86,7 @@ const Task = ({
         onClick={() => deleteTodo(_id)}
         aria-label={`Delete ${title}`}
       >
-        <FontAwesomeIcon icon={faTrash} />
+        🗑️
       </button>
       <div
         className="task-container"
@@ -131,7 +127,7 @@ const Task = ({
               className="task-controls-button"
               onClick={handleToggleControls}
             >
-              <FontAwesomeIcon icon={faEllipsis} />
+              ⋯
             </button>
             <button
               className={`task-toggle-button ${
@@ -139,7 +135,7 @@ const Task = ({
               }`}
               onClick={handleTogglePanel}
             >
-              <FontAwesomeIcon icon={faChevronRight} />
+              ❯
             </button>
           </div>
         </div>

@@ -1,7 +1,7 @@
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faArrowRightFromBracket, faUser } from "@fortawesome/free-solid-svg-icons";
+ "use client";
+
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "../util/router";
 import { useAuth } from "./auth";
 import LogoLight from "../img/logo-light.jpeg";
 import LogoDark from "../img/logo-dark.jpeg";
@@ -17,7 +17,10 @@ const Header = ({ isLight }) => {
       <header className="App-header">
         <div className="App-header-main">
           <div className="App-title-container">
-            <img src={isLight ? LogoLight : LogoDark} alt="Logo" />
+            <img
+              src={(isLight ? LogoLight : LogoDark).src || (isLight ? LogoLight : LogoDark)}
+              alt="Logo"
+            />
           </div>
         </div>
         <div className="App-header-right">
@@ -32,7 +35,7 @@ const Header = ({ isLight }) => {
               onFocus={() => setIsHoveringUser(true)}
               onBlur={() => setIsHoveringUser(false)}
             >
-              <FontAwesomeIcon icon={isHoveringUser ? faArrowRightFromBracket : faUser} />
+              <span aria-hidden="true">{isHoveringUser ? "↪" : "👤"}</span>
               {isHoveringUser ? "Log Out" : userLabel}
             </button>
           ) : null}

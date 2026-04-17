@@ -1,36 +1,13 @@
+ "use client";
+
 export const AUTH_EXPIRED_EVENT = "app:auth-expired";
 
-const normalizeBaseUrl = (value) =>
-  typeof value === "string" ? value.trim().replace(/\/+$/, "") : "";
-
-const apiBaseUrl = normalizeBaseUrl(
-  process.env.NODE_ENV === "development"
-    ? process.env.REACT_APP_SERVER_URL
-    : process.env.REACT_APP_PROD_SERVER_URL || ""
-);
+const apiBaseUrl = "";
 
 export const serverUrl = apiBaseUrl;
 
 const getUrl = (path) => `${apiBaseUrl}${path}`;
-const getRuntimeOrigin = () =>
-  typeof window === "undefined" ? "" : normalizeBaseUrl(window.location.origin);
-
-const getSameOriginRetryUrl = (url) => {
-  const runtimeOrigin = getRuntimeOrigin();
-
-  if (
-    process.env.NODE_ENV === "development" ||
-    !apiBaseUrl ||
-    !runtimeOrigin ||
-    runtimeOrigin === apiBaseUrl ||
-    typeof url !== "string" ||
-    !url.startsWith(apiBaseUrl)
-  ) {
-    return "";
-  }
-
-  return `${runtimeOrigin}${url.slice(apiBaseUrl.length)}`;
-};
+const getSameOriginRetryUrl = () => "";
 
 const baseHeaders = {
   "Content-Type": "application/json",
@@ -113,6 +90,10 @@ const getRequestInit = (config = {}) => {
 };
 
 export const getStoredValue = (key) => {
+  if (typeof window === "undefined") {
+    return null;
+  }
+
   const storedValue = localStorage.getItem(key);
 
   if (!storedValue) {

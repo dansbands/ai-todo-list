@@ -1,6 +1,8 @@
+ "use client";
+
 import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import Input from "../pages/input";
+import { Link, useNavigate } from "../util/router";
+import Input from "../views/input";
 import {
   createGuestSession,
   getRequestErrorMessage,

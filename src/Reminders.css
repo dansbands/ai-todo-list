@@ -458,7 +458,6 @@ body.dark-mode .help-container {
 .auth-submit-button:hover,
 .task-form-right button:hover,
 .chat-button:hover,
-.task-delete-button:hover,
 .App-login:hover,
 .App-user:hover,
 .color-mode-switch:hover,
@@ -810,6 +809,10 @@ body.dark-mode .help-container {
 .task-swipe-shell.is-revealed .task-delete-button {
   opacity: 1;
   pointer-events: auto;
+}
+
+.task-delete-button:hover {
+  transform: translateY(-50%) scale(1.01);
 }
 
 .chat-form,
